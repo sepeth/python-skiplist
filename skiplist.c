@@ -1,22 +1,38 @@
 #include <Python.h>
 
+#define MAX_LEVEL 16
+#define PROBABILITY 0.25
+
+
 typedef struct Node {
     PyObject *value;
-    struct Node *next;
+    struct Node *forwards[MAX_LEVEL];
 } Node;
 
 
 typedef struct {
     PyObject_VAR_HEAD
-    Node *head;
+    Node head;
+    int level;
 } SortedSet;
+
+
+static int
+random_level(void)
+{
+    static const unsigned int p = PROBABILITY * 0xFFFF;
+    int l = 1;
+    while ((random() & 0xFFFF) < p)
+        ++l;
+    return l < MAX_LEVEL ? l : MAX_LEVEL;
+}
 
 
 static void
 _SortedSet_dealloc(Node *node)
 {
     if (node != NULL) {
-        _SortedSet_dealloc(node->next);
+        _SortedSet_dealloc(node->forwards[1]);
         Py_DECREF(node->value);
         PyMem_RawFree(node);
     }
@@ -26,21 +42,7 @@ _SortedSet_dealloc(Node *node)
 static void
 SortedSet_dealloc(SortedSet *self)
 {
-    _SortedSet_dealloc(self->head);
-}
-
-
-static PyObject *
-SortedSet_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
-{
-    SortedSet *self;
-    
-    self = (SortedSet*)type->tp_alloc(type, 0);
-    if (self == NULL)
-        return NULL;
-    self->head = NULL;
-
-    return (PyObject*) self;
+    _SortedSet_dealloc(self->head.forwards[1]);
 }
 
 
@@ -50,82 +52,57 @@ SortedSet_insert(SortedSet *self, PyObject *args) {
     if (!PyArg_UnpackTuple(args, "insert", 1, 1, &v))
         return NULL;
 
-    Node *node = PyMem_RawMalloc(sizeof(Node));
-    if (node == NULL)
-        return PyErr_NoMemory();
+    Node *next;
+    Node *update[MAX_LEVEL];
+    Node *x = &self->head;
 
-    Py_INCREF(v);
-    node->value = v;
-    node->next = self->head;
-    self->head = node;
-    Py_SIZE(self) += 1;
+    for (int i = self->level; i >= 1; i--) {
+        next = x->forwards[i];
+        while (next != NULL && PyObject_RichCompareBool(next->value, v, Py_LT)) {
+            x = next;
+            next = next->forwards[i];
+        }
+        update[i] = x;
+    }
+
+    next = x->forwards[1];
+    if (next != NULL && PyObject_RichCompareBool(next->value, v, Py_EQ)) {
+        // it's already in the set
+        printf("IT IS ALREADY IN THE SET\n");
+    } else {
+        int lvl = random_level();
+        if (lvl > self->level) {
+            for (int i = self->level + 1; i <= lvl; ++i)
+                update[i] = &self->head;
+            self->level = lvl;
+        }
+
+        Node *node = PyMem_RawMalloc(sizeof(Node));
+        if (node == NULL)
+            return PyErr_NoMemory();
+        Py_INCREF(v);
+        node->value = v;
+
+        for (int i = 1; i <= lvl; ++i) {
+            node->forwards[i] = update[i]->forwards[i];
+            update[i]->forwards[i] = node;
+        }
+
+        Py_SIZE(self) += 1;
+    }
+
+    for (Node *p = &self->head; p != NULL; p = p->forwards[1]) {
+        printf("%s\n", PyUnicode_AsUTF8(PyObject_Repr(p->value)));
+    }
+
     Py_RETURN_NONE;
 }
 
 
 static Py_ssize_t
-SortedSet_length(SortedSet *self) 
+SortedSet_length(SortedSet *self)
 {
     return Py_SIZE(self);
-}
-
-
-static PyObject *
-SortedSet_repr(SortedSet *self)
-{
-    Py_ssize_t i;
-    PyObject *s;
-    Node *p;
-    _PyUnicodeWriter writer;
-    
-    if (Py_SIZE(self) == 0)
-        return PyUnicode_FromString("[]");
-
-    i = Py_ReprEnter((PyObject*)self);
-    if (i != 0) {
-        return i > 0 ? PyUnicode_FromString("[...]") : NULL;
-    }
-
-    _PyUnicodeWriter_Init(&writer);
-    writer.overallocate = 1;
-    /* "[" + "1" + ", 2" * (len - 1) + "]" */
-    writer.min_length = 1 + 1 + (2 + 1) * (Py_SIZE(self) - 1) + 1;
-
-    if (_PyUnicodeWriter_WriteChar(&writer, '[') < 0)
-        goto error;
-
-    for (i = 0, p = self->head; i < Py_SIZE(self); ++i) {
-        if (i > 0) {
-            if (_PyUnicodeWriter_WriteASCIIString(&writer, ", ", 2) < 0)
-                goto error;
-        }
-        if (Py_EnterRecursiveCall(" while getting the repr of a list"))
-            goto error;
-        s = PyObject_Repr(p->value);
-        Py_LeaveRecursiveCall();
-        if (s == NULL)
-            goto error;
-
-        if (_PyUnicodeWriter_WriteStr(&writer, s) < 0) {
-            Py_DECREF(s);
-            goto error;
-        }
-        Py_DECREF(s);
-
-        p = p->next;
-    }
-
-    writer.overallocate = 0;
-    if (_PyUnicodeWriter_WriteChar(&writer, ']') < 0)
-        goto error;
-
-    Py_ReprLeave((PyObject*)self);
-    return _PyUnicodeWriter_Finish(&writer);
-
-error:
-    _PyUnicodeWriter_Dealloc(&writer);
-    Py_ReprLeave((PyObject*)self);
-    return NULL;
 }
 
 
@@ -152,7 +129,7 @@ static PyTypeObject SortedSetType = {
     0,                             /* tp_getattr */
     0,                             /* tp_setattr */
     0,                             /* tp_reserved */
-    (reprfunc)SortedSet_repr,      /* tp_repr */
+    0,                             /* tp_repr */
     0,                             /* tp_as_number */
     &skiplist_as_sequence,         /* tp_as_sequence */
     0,                             /* tp_as_mapping */
@@ -180,7 +157,7 @@ static PyTypeObject SortedSetType = {
     0,                             /* tp_dictoffset */
     0,                             /* tp_init */
     0,                             /* tp_alloc */
-    SortedSet_new,                 /* tp_new */
+    PyType_GenericNew,             /* tp_new */
 };
 
 
