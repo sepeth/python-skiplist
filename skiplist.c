@@ -24,25 +24,19 @@ random_level(void)
     int l = 0;
     while ((random() & 0xFFFF) < p)
         ++l;
-    return l < MAX_LEVEL ? l : MAX_LEVEL;
-}
-
-
-static void
-_SortedSet_dealloc(Node *node)
-{
-    if (node != NULL) {
-        _SortedSet_dealloc(node->forwards[1]);
-        Py_DECREF(node->value);
-        PyMem_RawFree(node);
-    }
+    return l < MAX_LEVEL ? l : MAX_LEVEL - 1;
 }
 
 
 static void
 SortedSet_dealloc(SortedSet *self)
 {
-    _SortedSet_dealloc(self->head.forwards[1]);
+    Node *next = NULL;
+    for (Node *p = self->head.forwards[0]; p != NULL; p = next) {
+        next = p->forwards[0];
+        Py_DECREF(p->value);
+        PyMem_RawFree(p);
+    }
 }
 
 
