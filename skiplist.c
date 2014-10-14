@@ -92,11 +92,12 @@ SortedSet_insert(SortedSet *self, PyObject *args) {
 
 static PyObject *
 SortedSet_print(SortedSet *self, PyObject *v) {
-    for (Node *p = &self->head; p != NULL; p = p->forwards[1]) {
+    for (Node *p = &self->head; p != NULL; p = p->forwards[0]) {
         printf("%s\n", PyUnicode_AsUTF8(PyObject_Repr(p->value)));
     }
     Py_RETURN_NONE;
 }
+
 
 static Py_ssize_t
 SortedSet_length(SortedSet *self)
