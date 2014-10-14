@@ -21,7 +21,7 @@ static int
 random_level(void)
 {
     static const unsigned int p = PROBABILITY * 0xFFFF;
-    int l = 1;
+    int l = 0;
     while ((random() & 0xFFFF) < p)
         ++l;
     return l < MAX_LEVEL ? l : MAX_LEVEL;
@@ -56,7 +56,7 @@ SortedSet_insert(SortedSet *self, PyObject *args) {
     Node *update[MAX_LEVEL];
     Node *x = &self->head;
 
-    for (int i = self->level; i >= 1; i--) {
+    for (int i = self->level; i >= 0; i--) {
         next = x->forwards[i];
         while (next != NULL && PyObject_RichCompareBool(next->value, v, Py_LT)) {
             x = next;
@@ -65,10 +65,11 @@ SortedSet_insert(SortedSet *self, PyObject *args) {
         update[i] = x;
     }
 
-    next = x->forwards[1];
+    next = x->forwards[0];
     if (next != NULL && PyObject_RichCompareBool(next->value, v, Py_EQ)) {
-        // it's already in the set
-        printf("IT IS ALREADY IN THE SET\n");
+        Py_INCREF(v);
+        Py_DECREF(next->value);
+        next->value = v;
     } else {
         int lvl = random_level();
         if (lvl > self->level) {
@@ -83,7 +84,7 @@ SortedSet_insert(SortedSet *self, PyObject *args) {
         Py_INCREF(v);
         node->value = v;
 
-        for (int i = 1; i <= lvl; ++i) {
+        for (int i = 0; i <= lvl; ++i) {
             node->forwards[i] = update[i]->forwards[i];
             update[i]->forwards[i] = node;
         }
@@ -91,13 +92,17 @@ SortedSet_insert(SortedSet *self, PyObject *args) {
         Py_SIZE(self) += 1;
     }
 
-    for (Node *p = &self->head; p != NULL; p = p->forwards[1]) {
-        printf("%s\n", PyUnicode_AsUTF8(PyObject_Repr(p->value)));
-    }
-
     Py_RETURN_NONE;
 }
 
+
+static PyObject *
+SortedSet_print(SortedSet *self, PyObject *v) {
+    for (Node *p = &self->head; p != NULL; p = p->forwards[1]) {
+        printf("%s\n", PyUnicode_AsUTF8(PyObject_Repr(p->value)));
+    }
+    Py_RETURN_NONE;
+}
 
 static Py_ssize_t
 SortedSet_length(SortedSet *self)
@@ -108,8 +113,9 @@ SortedSet_length(SortedSet *self)
 
 static PyMethodDef SortedSet_methods[] = {
     {"insert", (PyCFunction)SortedSet_insert, METH_VARARGS,
-     "insert an element into the list"
-    },
+     "insert an element into the list"},
+    {"print", (PyCFunction)SortedSet_print, METH_NOARGS,
+     "print the list"},
     {NULL}  /* Sentinel */
 };
 
