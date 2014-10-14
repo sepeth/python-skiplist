@@ -91,6 +91,44 @@ SortedSet_insert(SortedSet *self, PyObject *args) {
 
 
 static PyObject *
+SortedSet_delete(SortedSet *self, PyObject *args)
+{
+    PyObject *v;
+    if (!PyArg_UnpackTuple(args, "delete", 1, 1, &v))
+        return NULL;
+
+    Node *next;
+    Node *update[MAX_LEVEL];
+    Node *x = &self->head;
+
+    for (int i = self->level; i >= 0; --i) {
+        next = x->forwards[i];
+        while (next != NULL && PyObject_RichCompareBool(next->value, v, Py_LT)) {
+            x = next;
+            next = next->forwards[i];
+        }
+        update[i] = x;
+    }
+
+    if (next != NULL && PyObject_RichCompareBool(next->value, v, Py_EQ)) {
+        for (int i = self->level; i >= 0; --i) {
+            if (update[i]->forwards[i] == next) {
+                update[i]->forwards[i] = next->forwards[i];
+            }
+        }
+        Py_DECREF(next->value);
+        Py_SIZE(self) -= 1;
+        PyMem_RawFree(next);
+    } else {
+        PyErr_SetString(PyExc_KeyError, PyUnicode_AsUTF8(PyObject_Repr(v)));
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+
+static PyObject *
 SortedSet_print(SortedSet *self, PyObject *v) {
     for (Node *p = &self->head; p != NULL; p = p->forwards[0]) {
         printf("%s\n", PyUnicode_AsUTF8(PyObject_Repr(p->value)));
@@ -111,6 +149,8 @@ static PyMethodDef SortedSet_methods[] = {
      "insert an element into the list"},
     {"print", (PyCFunction)SortedSet_print, METH_NOARGS,
      "print the list"},
+    {"delete", (PyCFunction)SortedSet_delete, METH_VARARGS,
+     "delete an element from the list"},
     {NULL}  /* Sentinel */
 };
 
