@@ -17,6 +17,13 @@ typedef struct {
 } SortedSet;
 
 
+typedef struct {
+    PyObject_HEAD
+    Node *node;
+    SortedSet *self;
+} SortedSetIter;
+
+
 static int
 random_level(void)
 {
@@ -144,6 +151,10 @@ SortedSet_length(SortedSet *self)
 }
 
 
+static PyObject* SortedSet_iter(PyObject *self);
+static PyObject* SortedSetIter_next(SortedSetIter *it);
+static void SortedSetIter_dealloc(SortedSetIter *it);
+
 static PyMethodDef SortedSet_methods[] = {
     {"insert", (PyCFunction)SortedSet_insert, METH_VARARGS,
      "insert an element into the list"},
@@ -153,6 +164,7 @@ static PyMethodDef SortedSet_methods[] = {
      "delete an element from the list"},
     {NULL}  /* Sentinel */
 };
+
 
 static PySequenceMethods skiplist_as_sequence = {
     (lenfunc)SortedSet_length,                      /* sq_length */
@@ -186,7 +198,7 @@ static PyTypeObject SortedSetType = {
     0,                             /* tp_clear */
     0,                             /* tp_richcompare */
     0,                             /* tp_weaklistoffset */
-    0,                             /* tp_iter */
+    SortedSet_iter,                /* tp_iter */
     0,                             /* tp_iternext */
     SortedSet_methods,             /* tp_methods */
     0,                             /* tp_members */
@@ -202,12 +214,81 @@ static PyTypeObject SortedSetType = {
 };
 
 
+static PyTypeObject SortedSetIter_Type = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "SortedSetIter",
+    sizeof(SortedSetIter),
+    0,                                          /* tp_itemsize */
+    /* methods */
+    (destructor)SortedSetIter_dealloc,          /* tp_dealloc */
+    0,                                          /* tp_print */
+    0,                                          /* tp_getattr */
+    0,                                          /* tp_setattr */
+    0,                                          /* tp_reserved */
+    0,                                          /* tp_repr */
+    0,                                          /* tp_as_number */
+    0,                                          /* tp_as_sequence */
+    0,                                          /* tp_as_mapping */
+    0,                                          /* tp_hash */
+    0,                                          /* tp_call */
+    0,                                          /* tp_str */
+    0,                                          /* tp_getattro */
+    0,                                          /* tp_setattro */
+    0,                                          /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,    /* tp_flags */
+    0,                                          /* tp_doc */
+    0,                                          /* tp_traverse */
+    0,                                          /* tp_clear */
+    0,                                          /* tp_richcompare */
+    0,                                          /* tp_weaklistoffset */
+    PyObject_SelfIter,                          /* tp_iter */
+    (iternextfunc)SortedSetIter_next,           /* tp_iternext */
+    0,                                          /* tp_methods */
+    0,                                          /* tp_members */
+};
+
+
 static PyModuleDef skiplistmodule = {
     PyModuleDef_HEAD_INIT,
     "skiplist",
     "SkipList implementation",
     -1
 };
+
+
+static PyObject *
+SortedSet_iter(PyObject *self) {
+    SortedSet *s = (SortedSet *)self;
+    SortedSetIter *it = PyObject_New(SortedSetIter, &SortedSetIter_Type);
+    if (it == NULL)
+        return NULL;
+    it->node = s->head.forwards[0];
+    it->self = s;
+    Py_INCREF(self);
+    return (PyObject *)it;
+}
+
+
+static PyObject *
+SortedSetIter_next(SortedSetIter *it)
+{
+    Node *node = it->node;
+    if (node == NULL) {
+        Py_DECREF(it->self);
+        return NULL;
+    }
+    it->node = it->node->forwards[0];
+    Py_INCREF(node->value);
+    return node->value;
+}
+
+
+static void
+SortedSetIter_dealloc(SortedSetIter *it)
+{
+    Py_XDECREF(it->self);
+    PyObject_Free(it);
+}
 
 
 PyMODINIT_FUNC
