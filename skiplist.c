@@ -50,7 +50,6 @@ SortedSet_dealloc(SortedSet *self)
 }
 
 
-
 static PyObject *
 SortedSet_insert(SortedSet *self, PyObject *args) {
     PyObject *v;
@@ -60,10 +59,13 @@ SortedSet_insert(SortedSet *self, PyObject *args) {
     Node *next;
     Node *update[MAX_LEVEL];
     Node *x = &self->head;
+    int cmp;
 
     for (int i = self->level; i >= 0; i--) {
         next = x->forwards[i];
-        while (next != NULL && lessthan(next->value, v)) {
+        while (next != NULL && (cmp = lessthan(next->value, v))) {
+            if (cmp == -1)
+                return NULL;
             x = next;
             next = next->forwards[i];
         }
@@ -111,10 +113,13 @@ SortedSet_delete(SortedSet *self, PyObject *args)
     Node *next;
     Node *update[MAX_LEVEL];
     Node *x = &self->head;
+    int cmp;
 
     for (int i = self->level; i >= 0; --i) {
         next = x->forwards[i];
-        while (next != NULL && lessthan(next->value, v)) {
+        while (next != NULL && (cmp = lessthan(next->value, v))) {
+            if (cmp == -1)
+                return NULL;
             x = next;
             next = next->forwards[i];
         }
