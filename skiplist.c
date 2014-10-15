@@ -3,6 +3,9 @@
 #define MAX_LEVEL 16
 #define PROBABILITY 0.25
 
+#define lessthan(p, q) PyObject_RichCompareBool(p, q, Py_LT)
+#define equal(p, q)    PyObject_RichCompareBool(p, q, Py_EQ)
+
 
 typedef struct Node {
     PyObject *value;
@@ -47,6 +50,7 @@ SortedSet_dealloc(SortedSet *self)
 }
 
 
+
 static PyObject *
 SortedSet_insert(SortedSet *self, PyObject *args) {
     PyObject *v;
@@ -59,7 +63,7 @@ SortedSet_insert(SortedSet *self, PyObject *args) {
 
     for (int i = self->level; i >= 0; i--) {
         next = x->forwards[i];
-        while (next != NULL && PyObject_RichCompareBool(next->value, v, Py_LT)) {
+        while (next != NULL && lessthan(next->value, v)) {
             x = next;
             next = next->forwards[i];
         }
@@ -67,7 +71,7 @@ SortedSet_insert(SortedSet *self, PyObject *args) {
     }
 
     next = x->forwards[0];
-    if (next != NULL && PyObject_RichCompareBool(next->value, v, Py_EQ)) {
+    if (next != NULL && equal(next->value, v)) {
         Py_INCREF(v);
         Py_DECREF(next->value);
         next->value = v;
@@ -110,14 +114,14 @@ SortedSet_delete(SortedSet *self, PyObject *args)
 
     for (int i = self->level; i >= 0; --i) {
         next = x->forwards[i];
-        while (next != NULL && PyObject_RichCompareBool(next->value, v, Py_LT)) {
+        while (next != NULL && lessthan(next->value, v)) {
             x = next;
             next = next->forwards[i];
         }
         update[i] = x;
     }
 
-    if (next != NULL && PyObject_RichCompareBool(next->value, v, Py_EQ)) {
+    if (next != NULL && equal(next->value, v)) {
         for (int i = self->level; i >= 0; --i) {
             if (update[i]->forwards[i] == next) {
                 update[i]->forwards[i] = next->forwards[i];
