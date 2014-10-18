@@ -251,7 +251,7 @@ static PyMethodDef SortedSet_methods[] = {
 };
 
 
-static PySequenceMethods skiplist_as_sequence = {
+static PySequenceMethods sortedset_as_sequence = {
     (lenfunc)SortedSet_length,                      /* sq_length */
     0
 };
@@ -269,7 +269,7 @@ static PyTypeObject SortedSetType = {
     0,                             /* tp_reserved */
     0,                             /* tp_repr */
     0,                             /* tp_as_number */
-    &skiplist_as_sequence,         /* tp_as_sequence */
+    &sortedset_as_sequence,         /* tp_as_sequence */
     0,                             /* tp_as_mapping */
     PyObject_HashNotImplemented,   /* tp_hash  */
     0,                             /* tp_call */
@@ -342,9 +342,9 @@ static PyTypeObject SortedSetIter_Type = {
 };
 
 
-static PyModuleDef skiplistmodule = {
+static PyModuleDef sortedsetmodule = {
     PyModuleDef_HEAD_INIT,
-    "skiplist",
+    "_sortedset",
     "SkipList implementation",
     -1
 };
@@ -398,13 +398,13 @@ SortedSetIter_traverse(SortedSetIter *it, visitproc visit, void *arg)
 
 
 PyMODINIT_FUNC
-PyInit_skiplist(void)
+PyInit__sortedset(void)
 {
     PyObject *m;
     if (PyType_Ready(&SortedSetType) < 0)
         return NULL;
 
-    m = PyModule_Create(&skiplistmodule);
+    m = PyModule_Create(&sortedsetmodule);
     if (m == NULL)
         return NULL;
 
