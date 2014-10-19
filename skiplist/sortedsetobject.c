@@ -180,6 +180,35 @@ SortedSet_print(SortedSet *self, PyObject *v) {
 }
 
 
+static PyObject *
+SortedSet_subscript(SortedSet *self, PyObject *key)
+{
+    Node *next;
+    Node *update[MAX_LEVEL];
+    Node *x = &self->head;
+    int cmp;
+
+    for (int i = self->level; i >= 0; --i) {
+        next = x->forwards[i];
+        while (next != NULL && (cmp = lessthan(next->value, key))) {
+            if (cmp == -1)
+                return NULL;
+            x = next;
+            next = next->forwards[i];
+        }
+        update[i] = x;
+    }
+
+    if (next != NULL && equal(next->value, key)) {
+        Py_INCREF(next->value);
+        return next->value;
+    } else {
+        PyErr_SetString(PyExc_KeyError, PyUnicode_AsUTF8(PyObject_Repr(key)));
+        return NULL;
+    }
+}
+
+
 static Py_ssize_t
 SortedSet_length(SortedSet *self)
 {
@@ -246,6 +275,8 @@ static PyMethodDef SortedSet_methods[] = {
      "print the list"},
     {"remove", (PyCFunction)SortedSet_remove, METH_VARARGS,
      "remove an element from the list"},
+    {"__getitem__", (PyCFunction)SortedSet_subscript, METH_O,
+     "get an element from the list"},
     {NULL}  /* Sentinel */
 };
 
@@ -253,6 +284,13 @@ static PyMethodDef SortedSet_methods[] = {
 static PySequenceMethods sortedset_as_sequence = {
     (lenfunc)SortedSet_length,                      /* sq_length */
     0
+};
+
+
+static PyMappingMethods sortedset_as_mapping = {
+    (lenfunc)SortedSet_length,       /*mp_length*/
+    (binaryfunc)SortedSet_subscript, /*mp_subscript*/
+    0,                               /*mp_ass_subscript*/
 };
 
 
@@ -268,8 +306,8 @@ static PyTypeObject SortedSetType = {
     0,                             /* tp_reserved */
     0,                             /* tp_repr */
     0,                             /* tp_as_number */
-    &sortedset_as_sequence,         /* tp_as_sequence */
-    0,                             /* tp_as_mapping */
+    &sortedset_as_sequence,        /* tp_as_sequence */
+    &sortedset_as_mapping,         /* tp_as_mapping */
     PyObject_HashNotImplemented,   /* tp_hash  */
     0,                             /* tp_call */
     0,                             /* tp_str */
