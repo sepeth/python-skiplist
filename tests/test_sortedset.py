@@ -62,3 +62,7 @@ class TestSortedSetIter(unittest.TestCase):
         for item in s:
             l.append(item)
         self.assertEqual(l, [3, 5, 7, 3, 5, 7])
+
+
+if __name__ == '__main__':
+    unittest.main()
