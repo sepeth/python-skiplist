@@ -37,7 +37,7 @@ random_level(void)
     return l < MAX_LEVEL ? l : MAX_LEVEL - 1;
 }
 
-static PyObject* insert(SortedSet *self, PyObject *arg);
+static PyObject* add(SortedSet *self, PyObject *arg);
 
 static int
 SortedSet_init(SortedSet *self, PyObject *args, PyObject *kwds)
@@ -56,7 +56,7 @@ SortedSet_init(SortedSet *self, PyObject *args, PyObject *kwds)
     }
 
     while ((key = PyIter_Next(it)) != NULL) {
-        if (insert(self, key) == NULL) {
+        if (add(self, key) == NULL) {
             Py_DECREF(it);
             Py_DECREF(key);
             return -1;
@@ -73,7 +73,7 @@ SortedSet_init(SortedSet *self, PyObject *args, PyObject *kwds)
 
 
 static PyObject *
-insert(SortedSet *self, PyObject *arg)
+add(SortedSet *self, PyObject *arg)
 {
     Node *next;
     Node *update[MAX_LEVEL];
@@ -123,11 +123,11 @@ insert(SortedSet *self, PyObject *arg)
 
 
 static PyObject *
-SortedSet_insert(SortedSet *self, PyObject *args) {
+SortedSet_add(SortedSet *self, PyObject *args) {
     PyObject *v;
-    if (!PyArg_UnpackTuple(args, "insert", 1, 1, &v))
+    if (!PyArg_UnpackTuple(args, "add", 1, 1, &v))
         return NULL;
-    return insert(self, v);
+    return add(self, v);
 }
 
 
@@ -241,8 +241,8 @@ static void SortedSetIter_dealloc(SortedSetIter *it);
 
 
 static PyMethodDef SortedSet_methods[] = {
-    {"insert", (PyCFunction)SortedSet_insert, METH_VARARGS,
-     "insert an element into the list"},
+    {"add", (PyCFunction)SortedSet_add, METH_VARARGS,
+     "add an element into the list"},
     {"print", (PyCFunction)SortedSet_print, METH_NOARGS,
      "print the list"},
     {"delete", (PyCFunction)SortedSet_delete, METH_VARARGS,
