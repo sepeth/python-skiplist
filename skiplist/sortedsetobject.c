@@ -38,16 +38,13 @@ random_level(void)
 }
 
 
-static PyObject *
-add(SortedSet *self, PyObject *arg)
+static Node *
+find_gt_or_eq(SortedSet *self, PyObject *arg, Node **update)
 {
     Node *next;
-    Node *update[MAX_LEVEL];
     Node *x = &self->head;
     Py_ssize_t i;
     int cmp;
-    int lvl;
-    Node *new_node;
 
     for (i = self->level; i >= 0; i--) {
         next = x->forwards[i];
@@ -57,10 +54,26 @@ add(SortedSet *self, PyObject *arg)
             x = next;
             next = next->forwards[i];
         }
-        update[i] = x;
+        if (update != NULL)
+            update[i] = x;
     }
 
-    next = x->forwards[0];
+    return next;
+}
+
+
+static PyObject *
+add(SortedSet *self, PyObject *arg)
+{
+    Node *update[MAX_LEVEL];
+    Py_ssize_t i;
+    int lvl;
+    Node *new_node;
+    Node *next = find_gt_or_eq(self, arg, update);
+
+    if (PyErr_Occurred())
+        return NULL;
+
     if (next != NULL && EQUAL(next->value, arg)) {
         Py_INCREF(arg);
         Py_DECREF(next->value);
@@ -137,25 +150,17 @@ static PyObject *
 SortedSet_remove(SortedSet *self, PyObject *args)
 {
     PyObject *v;
-    Node *next = NULL;
+    Node *next;
     Node *update[MAX_LEVEL];
-    Node *x = &self->head;
     Py_ssize_t i;
-    int cmp;
 
     if (!PyArg_UnpackTuple(args, "remove", 1, 1, &v))
         return NULL;
 
-    for (i = self->level; i >= 0; --i) {
-        next = x->forwards[i];
-        while (next != NULL && (cmp = LESSTHAN(next->value, v))) {
-            if (cmp == -1)
-                return NULL;
-            x = next;
-            next = next->forwards[i];
-        }
-        update[i] = x;
-    }
+    next = find_gt_or_eq(self, v, update);
+
+    if (PyErr_Occurred())
+        return NULL;
 
     if (next != NULL && EQUAL(next->value, v)) {
         for (i = self->level; i >= 0; --i) {
@@ -188,20 +193,10 @@ SortedSet_print(SortedSet *self, PyObject *v) {
 static PyObject *
 SortedSet_subscript(SortedSet *self, PyObject *key)
 {
-    Node *next = NULL;
-    Node *x = &self->head;
-    Py_ssize_t i;
-    int cmp;
+    Node *next = find_gt_or_eq(self, key, NULL);
 
-    for (i = self->level; i >= 0; --i) {
-        next = x->forwards[i];
-        while (next != NULL && (cmp = LESSTHAN(next->value, key))) {
-            if (cmp == -1)
-                return NULL;
-            x = next;
-            next = next->forwards[i];
-        }
-    }
+    if (PyErr_Occurred())
+        return NULL;
 
     if (next != NULL && EQUAL(next->value, key)) {
         Py_INCREF(next->value);

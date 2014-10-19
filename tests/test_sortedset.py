@@ -23,6 +23,10 @@ class TestSortedSetAdd(unittest.TestCase):
         self.ss.add(3)
         self.assertEqual(len(self.ss), 1)
 
+    def test_raise_unorderable_types(self):
+        self.ss.add(3)
+        self.assertRaises(TypeError, self.ss.add, 'sepeth')
+
 
 class TestSortedSetRemove(unittest.TestCase):
     def setUp(self):
@@ -35,6 +39,9 @@ class TestSortedSetRemove(unittest.TestCase):
 
     def test_remove_an_elem_that_is_not_in_the_set(self):
         self.assertRaises(KeyError, self.ss.remove, 53153)
+
+    def test_raise_unorderable_types(self):
+        self.assertRaises(TypeError, self.ss.remove, 'sepeth')
 
 
 class TestSortedSetIter(unittest.TestCase):
