@@ -17,7 +17,16 @@ class Pair(object):
 
 class SortedDict(SortedSet):
     def __getitem__(self, key):
-        return super(SortedDict, self).__getitem__(Pair(key)).value
+        try:
+            return super(SortedDict, self).__getitem__(Pair(key)).value
+        except KeyError:
+            raise KeyError(key)
 
     def __setitem__(self, key, value):
         super(SortedDict, self).add(Pair(key, value))
+
+    def __delitem__(self, key):
+        try:
+            self.remove(Pair(key))
+        except KeyError:
+            raise KeyError(key)
