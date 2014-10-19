@@ -37,40 +37,6 @@ random_level(void)
     return l < MAX_LEVEL ? l : MAX_LEVEL - 1;
 }
 
-static PyObject* add(SortedSet *self, PyObject *arg);
-
-static int
-SortedSet_init(SortedSet *self, PyObject *args, PyObject *kwds)
-{
-    PyObject *iterable = NULL, *it, *key;
-
-    if (!PyArg_ParseTuple(args, "|O:SortedSet", &iterable))
-        return -1;
-
-    if (iterable == NULL)
-        return 0;
-
-    it = PyObject_GetIter(iterable);
-    if (it == NULL) {
-        return -1;
-    }
-
-    while ((key = PyIter_Next(it)) != NULL) {
-        if (add(self, key) == NULL) {
-            Py_DECREF(it);
-            Py_DECREF(key);
-            return -1;
-        }
-        Py_DECREF(key);
-    }
-    Py_DECREF(it);
-
-    if (PyErr_Occurred())
-        return -1;
-
-    return 0;
-}
-
 
 static PyObject *
 add(SortedSet *self, PyObject *arg)
@@ -119,6 +85,39 @@ add(SortedSet *self, PyObject *arg)
     }
 
     Py_RETURN_NONE;
+}
+
+
+static int
+SortedSet_init(SortedSet *self, PyObject *args, PyObject *kwds)
+{
+    PyObject *iterable = NULL, *it, *key;
+
+    if (!PyArg_ParseTuple(args, "|O:SortedSet", &iterable))
+        return -1;
+
+    if (iterable == NULL)
+        return 0;
+
+    it = PyObject_GetIter(iterable);
+    if (it == NULL) {
+        return -1;
+    }
+
+    while ((key = PyIter_Next(it)) != NULL) {
+        if (add(self, key) == NULL) {
+            Py_DECREF(it);
+            Py_DECREF(key);
+            return -1;
+        }
+        Py_DECREF(key);
+    }
+    Py_DECREF(it);
+
+    if (PyErr_Occurred())
+        return -1;
+
+    return 0;
 }
 
 
