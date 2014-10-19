@@ -52,7 +52,7 @@ class TestSortedSetIter(unittest.TestCase):
         l = []
         for item in s:
             l.append(item)
-        self.assertListEqual(l, [3, 5, 7])
+        self.assertEqual(l, [3, 5, 7])
 
     def test_creating_two_iter_from_the_same_sortedset(self):
         s = SortedSet([7, 3, 5])
@@ -61,4 +61,4 @@ class TestSortedSetIter(unittest.TestCase):
             l.append(item)
         for item in s:
             l.append(item)
-        self.assertListEqual(l, [3, 5, 7, 3, 5, 7])
+        self.assertEqual(l, [3, 5, 7, 3, 5, 7])
