@@ -1,5 +1,7 @@
 from ._sortedset import SortedSet
 
+__all__ = ['SortedDict', 'SortedSet']
+
 
 class Pair(object):
     def __init__(self, key, value=None):
