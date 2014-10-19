@@ -132,10 +132,10 @@ SortedSet_add(SortedSet *self, PyObject *args) {
 
 
 static PyObject *
-SortedSet_delete(SortedSet *self, PyObject *args)
+SortedSet_remove(SortedSet *self, PyObject *args)
 {
     PyObject *v;
-    if (!PyArg_UnpackTuple(args, "delete", 1, 1, &v))
+    if (!PyArg_UnpackTuple(args, "remove", 1, 1, &v))
         return NULL;
 
     Node *next;
@@ -245,8 +245,8 @@ static PyMethodDef SortedSet_methods[] = {
      "add an element into the list"},
     {"print", (PyCFunction)SortedSet_print, METH_NOARGS,
      "print the list"},
-    {"delete", (PyCFunction)SortedSet_delete, METH_VARARGS,
-     "delete an element from the list"},
+    {"remove", (PyCFunction)SortedSet_remove, METH_VARARGS,
+     "remove an element from the list"},
     {NULL}  /* Sentinel */
 };
 
