@@ -44,9 +44,10 @@ add(SortedSet *self, PyObject *arg)
     Node *next;
     Node *update[MAX_LEVEL];
     Node *x = &self->head;
+    Py_ssize_t i;
     int cmp;
 
-    for (int i = self->level; i >= 0; i--) {
+    for (i = self->level; i >= 0; i--) {
         next = x->forwards[i];
         while (next != NULL && (cmp = lessthan(next->value, arg))) {
             if (cmp == -1)
@@ -65,7 +66,7 @@ add(SortedSet *self, PyObject *arg)
     } else {
         int lvl = random_level();
         if (lvl > self->level) {
-            for (int i = self->level + 1; i <= lvl; ++i)
+            for (i = self->level + 1; i <= lvl; ++i)
                 update[i] = &self->head;
             self->level = lvl;
         }
@@ -76,7 +77,7 @@ add(SortedSet *self, PyObject *arg)
         Py_INCREF(arg);
         node->value = arg;
 
-        for (int i = 0; i <= lvl; ++i) {
+        for (i = 0; i <= lvl; ++i) {
             node->forwards[i] = update[i]->forwards[i];
             update[i]->forwards[i] = node;
         }
@@ -140,9 +141,10 @@ SortedSet_remove(SortedSet *self, PyObject *args)
     Node *next;
     Node *update[MAX_LEVEL];
     Node *x = &self->head;
+    Py_ssize_t i;
     int cmp;
 
-    for (int i = self->level; i >= 0; --i) {
+    for (i = self->level; i >= 0; --i) {
         next = x->forwards[i];
         while (next != NULL && (cmp = lessthan(next->value, v))) {
             if (cmp == -1)
@@ -154,7 +156,7 @@ SortedSet_remove(SortedSet *self, PyObject *args)
     }
 
     if (next != NULL && equal(next->value, v)) {
-        for (int i = self->level; i >= 0; --i) {
+        for (i = self->level; i >= 0; --i) {
             if (update[i]->forwards[i] == next) {
                 update[i]->forwards[i] = next->forwards[i];
             }
@@ -173,7 +175,8 @@ SortedSet_remove(SortedSet *self, PyObject *args)
 
 static PyObject *
 SortedSet_print(SortedSet *self, PyObject *v) {
-    for (Node *p = &self->head; p != NULL; p = p->forwards[0]) {
+    Node *p;
+    for (p = &self->head; p != NULL; p = p->forwards[0]) {
         printf("%s\n", PyUnicode_AsUTF8(PyObject_Repr(p->value)));
     }
     Py_RETURN_NONE;
@@ -186,9 +189,10 @@ SortedSet_subscript(SortedSet *self, PyObject *key)
     Node *next;
     Node *update[MAX_LEVEL];
     Node *x = &self->head;
+    Py_ssize_t i;
     int cmp;
 
-    for (int i = self->level; i >= 0; --i) {
+    for (i = self->level; i >= 0; --i) {
         next = x->forwards[i];
         while (next != NULL && (cmp = lessthan(next->value, key))) {
             if (cmp == -1)
@@ -220,7 +224,8 @@ static int
 SortedSet_traverse(SortedSet *self, visitproc visit, void *arg)
 {
     Node *next = NULL;
-    for (Node *p = self->head.forwards[0]; p != NULL; p = next) {
+    Node *p;
+    for (p = self->head.forwards[0]; p != NULL; p = next) {
         next = p->forwards[0];
         Py_VISIT(p->value);
     }
@@ -231,7 +236,8 @@ SortedSet_traverse(SortedSet *self, visitproc visit, void *arg)
 static void
 setnull(Node *node)
 {
-    for (int i = 0; i < MAX_LEVEL; i++) {
+    Py_ssize_t i;
+    for (i = 0; i < MAX_LEVEL; i++) {
         node->forwards[i] = NULL;
     }
 }
@@ -241,7 +247,8 @@ static int
 SortedSet_clear(SortedSet *self)
 {
     Node *next = NULL;
-    for (Node *p = self->head.forwards[0]; p != NULL; p = next) {
+    Node *p;
+    for (p = self->head.forwards[0]; p != NULL; p = next) {
         PyObject *value = p->value;
         p->value = NULL;
         next = p->forwards[0];
