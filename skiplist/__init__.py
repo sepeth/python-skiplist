@@ -20,7 +20,7 @@ class SortedDict(SortedSet):
         try:
             return super(SortedDict, self).__getitem__(Pair(key)).value
         except KeyError:
-            raise KeyError(key)
+            raise KeyError('%s is not in the SortedDict' % key)
 
     def __setitem__(self, key, value):
         super(SortedDict, self).add(Pair(key, value))
@@ -29,4 +29,4 @@ class SortedDict(SortedSet):
         try:
             self.remove(Pair(key))
         except KeyError:
-            raise KeyError(key)
+            raise KeyError('%s is not in the SortedDict' % key)

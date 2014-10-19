@@ -165,7 +165,7 @@ SortedSet_remove(SortedSet *self, PyObject *args)
         Py_SIZE(self) -= 1;
         PyMem_RawFree(next);
     } else {
-        PyErr_SetString(PyExc_KeyError, PyUnicode_AsUTF8(PyObject_Repr(v)));
+        PyErr_Format(PyExc_KeyError, "%R is not in the SortedSet", v);
         return NULL;
     }
 
@@ -207,7 +207,7 @@ SortedSet_subscript(SortedSet *self, PyObject *key)
         Py_INCREF(next->value);
         return next->value;
     } else {
-        PyErr_SetString(PyExc_KeyError, PyUnicode_AsUTF8(PyObject_Repr(key)));
+        PyErr_Format(PyExc_KeyError, "%R is not in the SortedSet", key);
         return NULL;
     }
 }
