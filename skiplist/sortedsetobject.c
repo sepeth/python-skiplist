@@ -3,8 +3,8 @@
 #define MAX_LEVEL 16
 #define PROBABILITY 0.25
 
-#define lessthan(p, q) PyObject_RichCompareBool(p, q, Py_LT)
-#define equal(p, q)    PyObject_RichCompareBool(p, q, Py_EQ)
+#define LESSTHAN(p, q) PyObject_RichCompareBool(p, q, Py_LT)
+#define EQUAL(p, q)    PyObject_RichCompareBool(p, q, Py_EQ)
 
 
 typedef struct Node {
@@ -49,7 +49,7 @@ add(SortedSet *self, PyObject *arg)
 
     for (i = self->level; i >= 0; i--) {
         next = x->forwards[i];
-        while (next != NULL && (cmp = lessthan(next->value, arg))) {
+        while (next != NULL && (cmp = LESSTHAN(next->value, arg))) {
             if (cmp == -1)
                 return NULL;
             x = next;
@@ -59,7 +59,7 @@ add(SortedSet *self, PyObject *arg)
     }
 
     next = x->forwards[0];
-    if (next != NULL && equal(next->value, arg)) {
+    if (next != NULL && EQUAL(next->value, arg)) {
         Py_INCREF(arg);
         Py_DECREF(next->value);
         next->value = arg;
@@ -146,7 +146,7 @@ SortedSet_remove(SortedSet *self, PyObject *args)
 
     for (i = self->level; i >= 0; --i) {
         next = x->forwards[i];
-        while (next != NULL && (cmp = lessthan(next->value, v))) {
+        while (next != NULL && (cmp = LESSTHAN(next->value, v))) {
             if (cmp == -1)
                 return NULL;
             x = next;
@@ -155,7 +155,7 @@ SortedSet_remove(SortedSet *self, PyObject *args)
         update[i] = x;
     }
 
-    if (next != NULL && equal(next->value, v)) {
+    if (next != NULL && EQUAL(next->value, v)) {
         for (i = self->level; i >= 0; --i) {
             if (update[i]->forwards[i] == next) {
                 update[i]->forwards[i] = next->forwards[i];
@@ -194,7 +194,7 @@ SortedSet_subscript(SortedSet *self, PyObject *key)
 
     for (i = self->level; i >= 0; --i) {
         next = x->forwards[i];
-        while (next != NULL && (cmp = lessthan(next->value, key))) {
+        while (next != NULL && (cmp = LESSTHAN(next->value, key))) {
             if (cmp == -1)
                 return NULL;
             x = next;
@@ -203,7 +203,7 @@ SortedSet_subscript(SortedSet *self, PyObject *key)
         update[i] = x;
     }
 
-    if (next != NULL && equal(next->value, key)) {
+    if (next != NULL && EQUAL(next->value, key)) {
         Py_INCREF(next->value);
         return next->value;
     } else {
