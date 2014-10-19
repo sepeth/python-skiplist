@@ -1,4 +1,15 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+/build
+/*.egg-info
+
+# Editor / devtools
 .*.sw[pon]
 \#*#
-/build
-__pycache__
+/tags
