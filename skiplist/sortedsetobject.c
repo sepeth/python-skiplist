@@ -73,7 +73,7 @@ add(SortedSet *self, PyObject *arg)
             self->level = lvl;
         }
 
-        new_node = PyMem_RawMalloc(sizeof(Node));
+        new_node = PyMem_Malloc(sizeof(Node));
         if (new_node == NULL)
             return PyErr_NoMemory();
         Py_INCREF(arg);
@@ -165,7 +165,7 @@ SortedSet_remove(SortedSet *self, PyObject *args)
         }
         Py_DECREF(next->value);
         Py_SIZE(self) -= 1;
-        PyMem_RawFree(next);
+        PyMem_Free(next);
     } else {
         PyErr_Format(PyExc_KeyError, "%R is not in the SortedSet", v);
         return NULL;
