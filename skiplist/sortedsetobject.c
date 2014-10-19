@@ -46,6 +46,8 @@ add(SortedSet *self, PyObject *arg)
     Node *x = &self->head;
     Py_ssize_t i;
     int cmp;
+    int lvl;
+    Node *new_node;
 
     for (i = self->level; i >= 0; i--) {
         next = x->forwards[i];
@@ -64,22 +66,22 @@ add(SortedSet *self, PyObject *arg)
         Py_DECREF(next->value);
         next->value = arg;
     } else {
-        int lvl = random_level();
+        lvl = random_level();
         if (lvl > self->level) {
             for (i = self->level + 1; i <= lvl; ++i)
                 update[i] = &self->head;
             self->level = lvl;
         }
 
-        Node *node = PyMem_RawMalloc(sizeof(Node));
-        if (node == NULL)
+        new_node = PyMem_RawMalloc(sizeof(Node));
+        if (new_node == NULL)
             return PyErr_NoMemory();
         Py_INCREF(arg);
-        node->value = arg;
+        new_node->value = arg;
 
         for (i = 0; i <= lvl; ++i) {
-            node->forwards[i] = update[i]->forwards[i];
-            update[i]->forwards[i] = node;
+            new_node->forwards[i] = update[i]->forwards[i];
+            update[i]->forwards[i] = new_node;
         }
 
         Py_SIZE(self) += 1;
@@ -135,14 +137,14 @@ static PyObject *
 SortedSet_remove(SortedSet *self, PyObject *args)
 {
     PyObject *v;
-    if (!PyArg_UnpackTuple(args, "remove", 1, 1, &v))
-        return NULL;
-
     Node *next;
     Node *update[MAX_LEVEL];
     Node *x = &self->head;
     Py_ssize_t i;
     int cmp;
+
+    if (!PyArg_UnpackTuple(args, "remove", 1, 1, &v))
+        return NULL;
 
     for (i = self->level; i >= 0; --i) {
         next = x->forwards[i];
@@ -187,7 +189,6 @@ static PyObject *
 SortedSet_subscript(SortedSet *self, PyObject *key)
 {
     Node *next;
-    Node *update[MAX_LEVEL];
     Node *x = &self->head;
     Py_ssize_t i;
     int cmp;
@@ -200,7 +201,6 @@ SortedSet_subscript(SortedSet *self, PyObject *key)
             x = next;
             next = next->forwards[i];
         }
-        update[i] = x;
     }
 
     if (next != NULL && EQUAL(next->value, key)) {
