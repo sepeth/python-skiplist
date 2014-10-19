@@ -137,7 +137,7 @@ static PyObject *
 SortedSet_remove(SortedSet *self, PyObject *args)
 {
     PyObject *v;
-    Node *next;
+    Node *next = NULL;
     Node *update[MAX_LEVEL];
     Node *x = &self->head;
     Py_ssize_t i;
@@ -188,7 +188,7 @@ SortedSet_print(SortedSet *self, PyObject *v) {
 static PyObject *
 SortedSet_subscript(SortedSet *self, PyObject *key)
 {
-    Node *next;
+    Node *next = NULL;
     Node *x = &self->head;
     Py_ssize_t i;
     int cmp;
