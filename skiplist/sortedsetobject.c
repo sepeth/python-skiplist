@@ -41,7 +41,7 @@ random_level(void)
 static Node *
 find_gt_or_eq(SortedSet *self, PyObject *arg, Node **update)
 {
-    Node *next;
+    Node *next = NULL;
     Node *x = &self->head;
     Py_ssize_t i;
     int cmp;
@@ -149,9 +149,9 @@ SortedSet_add(SortedSet *self, PyObject *args) {
 static PyObject *
 SortedSet_remove(SortedSet *self, PyObject *args)
 {
-    PyObject *v;
-    Node *next;
+    Node *next = NULL;
     Node *update[MAX_LEVEL];
+    PyObject *v;
     Py_ssize_t i;
 
     if (!PyArg_UnpackTuple(args, "remove", 1, 1, &v))
