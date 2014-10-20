@@ -44,6 +44,12 @@ class TestSortedSetRemove(unittest.TestCase):
         self.assertRaises(TypeError, self.ss.remove, 'sepeth')
 
 
+class TestSortedSetSubscript(unittest.TestCase):
+    def test_search_an_element_in_the_empty_set(self):
+        ss = SortedSet()
+        self.assertRaises(KeyError, ss.__getitem__, 7)
+
+
 class TestSortedSetIter(unittest.TestCase):
     def test_empty_sortedset(self):
         l = []
