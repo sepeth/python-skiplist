@@ -20,6 +20,10 @@ setup(
     test_suite='tests',
 
     ext_modules=[
-        Extension('skiplist._sortedset', ['skiplist/sortedsetobject.c']),
+        Extension(
+            'skiplist._sortedset',
+            extra_compile_args=['-Wall', '-Werror'],
+            sources=['skiplist/sortedsetobject.c']
+        ),
     ]
 )
