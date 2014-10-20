@@ -181,16 +181,6 @@ SortedSet_remove(SortedSet *self, PyObject *args)
 
 
 static PyObject *
-SortedSet_print(SortedSet *self, PyObject *v) {
-    Node *p;
-    for (p = &self->head; p != NULL; p = p->forwards[0]) {
-        printf("%s\n", PyUnicode_AsUTF8(PyObject_Repr(p->value)));
-    }
-    Py_RETURN_NONE;
-}
-
-
-static PyObject *
 SortedSet_subscript(SortedSet *self, PyObject *key)
 {
     Node *next = find_gt_or_eq(self, key, NULL);
@@ -212,6 +202,46 @@ static Py_ssize_t
 SortedSet_length(SortedSet *self)
 {
     return Py_SIZE(self);
+}
+
+
+static PyObject *
+SortedSet_repr(SortedSet *self)
+{
+    PyObject *result = NULL, *keys, *listrepr, *tmp;
+    int status = Py_ReprEnter((PyObject*)self);
+
+    if (status != 0) {
+        if (status < 0)
+            return NULL;
+        return PyUnicode_FromFormat("%s(...)", Py_TYPE(self)->tp_name);
+    }
+
+    if (!Py_SIZE(self)) {
+        Py_ReprLeave((PyObject*)self);
+        return PyUnicode_FromFormat("%s()", Py_TYPE(self)->tp_name);
+    }
+
+    keys = PySequence_List((PyObject*)self);
+    if (keys == NULL)
+        goto done;
+
+    listrepr = PyObject_Repr(keys);
+    Py_DECREF(keys);
+    if (listrepr == NULL)
+        goto done;
+
+    tmp = PyUnicode_Substring(listrepr, 1, PyUnicode_GET_LENGTH(listrepr)-1);
+    Py_DECREF(listrepr);
+    if (tmp == NULL)
+        goto done;
+
+    listrepr = tmp;
+    result = PyUnicode_FromFormat("%s({%U})", Py_TYPE(self)->tp_name, listrepr);
+
+done:
+    Py_ReprLeave((PyObject*)self);
+    return result;
 }
 
 
@@ -273,8 +303,6 @@ static void SortedSetIter_dealloc(SortedSetIter *it);
 static PyMethodDef SortedSet_methods[] = {
     {"add", (PyCFunction)SortedSet_add, METH_VARARGS,
      "add an element into the list"},
-    {"print", (PyCFunction)SortedSet_print, METH_NOARGS,
-     "print the list"},
     {"remove", (PyCFunction)SortedSet_remove, METH_VARARGS,
      "remove an element from the list"},
     {"__getitem__", (PyCFunction)SortedSet_subscript, METH_O,
@@ -298,7 +326,7 @@ static PyMappingMethods sortedset_as_mapping = {
 
 static PyTypeObject SortedSetType = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    "skiplist.SortedSet",          /* tp_name */
+    "SortedSet",                   /* tp_name */
     sizeof(SortedSet),             /* tp_basicsize */
     0,                             /* tp_itemsize */
     (destructor)SortedSet_dealloc, /* tp_dealloc */
@@ -306,7 +334,7 @@ static PyTypeObject SortedSetType = {
     0,                             /* tp_getattr */
     0,                             /* tp_setattr */
     0,                             /* tp_reserved */
-    0,                             /* tp_repr */
+    (reprfunc)SortedSet_repr,      /* tp_repr */
     0,                             /* tp_as_number */
     &sortedset_as_sequence,        /* tp_as_sequence */
     &sortedset_as_mapping,         /* tp_as_mapping */

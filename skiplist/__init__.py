@@ -14,6 +14,9 @@ class Pair(object):
     def __eq__(self, other):
         return self.key == other.key
 
+    def __repr__(self):
+        return "%r: %r" % (self.key, self.value)
+
 
 class SortedDict(SortedSet):
     def __getitem__(self, key):

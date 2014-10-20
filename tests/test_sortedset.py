@@ -50,6 +50,17 @@ class TestSortedSetSubscript(unittest.TestCase):
         self.assertRaises(KeyError, ss.__getitem__, 7)
 
 
+class TestSortedSetRepr(unittest.TestCase):
+    def test_empty_sortedset_repr(self):
+        s = SortedSet()
+        self.assertEqual("SortedSet()", repr(s))
+
+    def test_sortedset_repr_with_some_elements_in_it(self):
+        s = SortedSet(['elma', 'armut', 'kel', 'mahmut'])
+        self.assertEqual("SortedSet({'armut', 'elma', 'kel', 'mahmut'})",
+                         repr(s))
+
+
 class TestSortedSetIter(unittest.TestCase):
     def test_empty_sortedset(self):
         l = []
