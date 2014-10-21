@@ -2,6 +2,17 @@ import unittest
 from skiplist import SortedDict
 
 
+class TestSortedDictSubscript(unittest.TestCase):
+    def test_raise_keyerror_for_nonexisting_key(self):
+        s = SortedDict()
+        self.assertRaises(KeyError, s.__getitem__, 'anaktar')
+
+    def test_setitem_and_getitem(self):
+        s = SortedDict()
+        s[3] = 'somevalue'
+        self.assertEqual(s[3], 'somevalue')
+
+
 class TestSortedDictRepr(unittest.TestCase):
     def test_empty_sorteddict_repr(self):
         s = SortedDict()
