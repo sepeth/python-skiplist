@@ -63,7 +63,7 @@ find_gt_or_eq(SortedSet *self, PyObject *arg, Node **update)
 
 
 static PyObject *
-add(SortedSet *self, PyObject *arg)
+SortedSet_add(SortedSet *self, PyObject *arg)
 {
     Node *update[MAX_LEVEL];
     Py_ssize_t i;
@@ -121,7 +121,7 @@ SortedSet_init(SortedSet *self, PyObject *args, PyObject *kwds)
     }
 
     while ((key = PyIter_Next(it)) != NULL) {
-        if (add(self, key) == NULL) {
+        if (SortedSet_add(self, key) == NULL) {
             Py_DECREF(it);
             Py_DECREF(key);
             return -1;
@@ -138,31 +138,18 @@ SortedSet_init(SortedSet *self, PyObject *args, PyObject *kwds)
 
 
 static PyObject *
-SortedSet_add(SortedSet *self, PyObject *args) {
-    PyObject *v;
-    if (!PyArg_UnpackTuple(args, "add", 1, 1, &v))
-        return NULL;
-    return add(self, v);
-}
-
-
-static PyObject *
-SortedSet_remove(SortedSet *self, PyObject *args)
+SortedSet_remove(SortedSet *self, PyObject *arg)
 {
     Node *next = NULL;
     Node *update[MAX_LEVEL];
-    PyObject *v;
     Py_ssize_t i;
 
-    if (!PyArg_UnpackTuple(args, "remove", 1, 1, &v))
-        return NULL;
-
-    next = find_gt_or_eq(self, v, update);
+    next = find_gt_or_eq(self, arg, update);
 
     if (PyErr_Occurred())
         return NULL;
 
-    if (next != NULL && EQUAL(next->value, v)) {
+    if (next != NULL && EQUAL(next->value, arg)) {
         for (i = self->level; i >= 0; --i) {
             if (update[i]->forwards[i] == next) {
                 update[i]->forwards[i] = next->forwards[i];
@@ -172,7 +159,7 @@ SortedSet_remove(SortedSet *self, PyObject *args)
         Py_SIZE(self) -= 1;
         PyMem_Free(next);
     } else {
-        PyErr_Format(PyExc_KeyError, "%R is not in the SortedSet", v);
+        PyErr_Format(PyExc_KeyError, "%R is not in the SortedSet", arg);
         return NULL;
     }
 
@@ -301,9 +288,9 @@ static void SortedSetIter_dealloc(SortedSetIter *it);
 
 
 static PyMethodDef SortedSet_methods[] = {
-    {"add", (PyCFunction)SortedSet_add, METH_VARARGS,
+    {"add", (PyCFunction)SortedSet_add, METH_O,
      "add an element into the list"},
-    {"remove", (PyCFunction)SortedSet_remove, METH_VARARGS,
+    {"remove", (PyCFunction)SortedSet_remove, METH_O,
      "remove an element from the list"},
     {"__getitem__", (PyCFunction)SortedSet_subscript, METH_O,
      "get an element from the list"},
