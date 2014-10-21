@@ -13,6 +13,25 @@ class TestSortedDictSubscript(unittest.TestCase):
         self.assertEqual(s[3], 'somevalue')
 
 
+class TestSortedDictDel(unittest.TestCase):
+    def test_raise_keyerror_for_deletion_nonexisting_key(self):
+        s = SortedDict()
+        with self.assertRaises(KeyError):
+            del s['anaktar']
+
+    def test_deletion_of_an_element_in_the_dict(self):
+        s = SortedDict()
+        s['elma'] = 1
+        s['armut'] = 2
+        s['kel'] = 3
+        s['mahmut'] = 4
+        oldlen = len(s)
+        del s['elma']
+        self.assertEqual(len(s), oldlen - 1)
+        with self.assertRaises(KeyError):
+            del s['elma']
+
+
 class TestSortedDictRepr(unittest.TestCase):
     def test_empty_sorteddict_repr(self):
         s = SortedDict()
