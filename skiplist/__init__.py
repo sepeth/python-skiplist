@@ -19,6 +19,10 @@ class Pair(object):
 
 
 class SortedDict(SortedSet):
+    def __init__(self, items=None):
+        items = map(lambda x: Pair(*x), items if items else [])
+        super(SortedDict, self).__init__(items)
+
     def __getitem__(self, key):
         try:
             return super(SortedDict, self).__getitem__(Pair(key)).value

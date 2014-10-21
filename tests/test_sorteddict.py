@@ -2,6 +2,13 @@ import unittest
 from skiplist import SortedDict
 
 
+class TestSortedDictInit(unittest.TestCase):
+    def test_initialization_with_tuples(self):
+        s = SortedDict([('elma', 1), ('armut', 2), ('kel', 3), ('mahmut', 4)])
+        self.assertEqual(len(s), 4)
+        self.assertEqual(s['kel'], 3)
+
+
 class TestSortedDictSubscript(unittest.TestCase):
     def test_raise_keyerror_for_nonexisting_key(self):
         s = SortedDict()
