@@ -185,6 +185,25 @@ SortedSet_subscript(SortedSet *self, PyObject *key)
 }
 
 
+static int
+contains(SortedSet *self, PyObject *key)
+{
+    Node *next = find_gt_or_eq(self, key, NULL);
+    return next != NULL && EQUAL(next->value, key);
+}
+
+
+static PyObject *
+SortedSet_contains(SortedSet *self, PyObject *key)
+{
+
+    long result = contains(self, key);
+    if (PyErr_Occurred())
+        return NULL;
+    return PyBool_FromLong(result);
+}
+
+
 static Py_ssize_t
 SortedSet_length(SortedSet *self)
 {
@@ -294,13 +313,23 @@ static PyMethodDef SortedSet_methods[] = {
      "remove an element from the list"},
     {"__getitem__", (PyCFunction)SortedSet_subscript, METH_O,
      "get an element from the list"},
+    {"__contains__", (PyCFunction)SortedSet_contains, METH_O,
+     "check if an element is in the list"},
     {NULL}  /* Sentinel */
 };
 
 
 static PySequenceMethods sortedset_as_sequence = {
-    (lenfunc)SortedSet_length,                      /* sq_length */
-    0
+    (lenfunc)SortedSet_length, /* sq_length */
+    0,                         /* sq_concat */
+    0,                         /* sq_repeat */
+    0,                         /* sq_item */
+    0,                         /* sq_slice */
+    0,                         /* sq_ass_item */
+    0,                         /* sq_ass_slice */
+    (objobjproc)contains,      /* sq_contains */
+    0,                         /* sq_inplace_concat */
+    0,                         /* sq_inplace_repeat */
 };
 
 
