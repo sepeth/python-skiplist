@@ -37,3 +37,6 @@ class SortedDict(SortedSet):
             self.remove(Pair(key))
         except KeyError:
             raise KeyError('%s is not in the SortedDict' % key)
+
+    def __contains__(self, key):
+        return super(SortedDict, self).__contains__(Pair(key))
