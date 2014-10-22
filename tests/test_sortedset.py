@@ -61,6 +61,17 @@ class TestSortedSetRepr(unittest.TestCase):
                          repr(s))
 
 
+class TestSortedSetContains(unittest.TestCase):
+    def setUp(self):
+        self.ss = SortedSet([7, 3, 12, 8])
+
+    def test_in_operator_for_existing_element(self):
+        self.assertTrue(12 in self.ss)
+
+    def test_in_operator_for_nonexisting_element(self):
+        self.assertFalse(13 in self.ss)
+
+
 class TestSortedSetIter(unittest.TestCase):
     def test_empty_sortedset(self):
         l = []

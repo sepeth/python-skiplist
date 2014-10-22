@@ -56,5 +56,16 @@ class TestSortedDictRepr(unittest.TestCase):
         )
 
 
+class TestSortedSetContains(unittest.TestCase):
+    def setUp(self):
+        self.sd = SortedDict([('elma', 1), ('armut', 2)])
+
+    def test_in_operator_for_existing_element(self):
+        self.assertTrue('armut' in self.sd)
+
+    def test_in_operator_for_nonexisting_element(self):
+        self.assertFalse('kel' in self.sd)
+
+
 if __name__ == '__main__':
     unittest.main()
