@@ -66,10 +66,10 @@ class TestSortedSetContains(unittest.TestCase):
         self.ss = SortedSet([7, 3, 12, 8])
 
     def test_in_operator_for_existing_element(self):
-        self.assertTrue(12 in self.ss)
+        self.assertIn(12, self.ss)
 
     def test_in_operator_for_nonexisting_element(self):
-        self.assertFalse(13 in self.ss)
+        self.assertNotIn(13, self.ss)
 
 
 class TestSortedSetIter(unittest.TestCase):

@@ -61,10 +61,10 @@ class TestSortedDictContains(unittest.TestCase):
         self.sd = SortedDict([('elma', 1), ('armut', 2)])
 
     def test_in_operator_for_existing_element(self):
-        self.assertTrue('armut' in self.sd)
+        self.assertIn('armut', self.sd)
 
     def test_in_operator_for_nonexisting_element(self):
-        self.assertFalse('kel' in self.sd)
+        self.assertNotIn('kel', self.sd)
 
 
 class TestSortedDictIterMethods(unittest.TestCase):
