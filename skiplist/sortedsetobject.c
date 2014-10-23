@@ -74,7 +74,6 @@ SortedSet_add(SortedSet *self, PyObject *arg)
     if (PyErr_Occurred())
         return NULL;
 
-    /* cmp = EQUAL ?? */
     if (next != NULL && EQUAL(next->value, arg)) {
         Py_INCREF(arg);
         Py_DECREF(next->value);

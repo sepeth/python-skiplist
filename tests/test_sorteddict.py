@@ -56,7 +56,7 @@ class TestSortedDictRepr(unittest.TestCase):
         )
 
 
-class TestSortedSetContains(unittest.TestCase):
+class TestSortedDictContains(unittest.TestCase):
     def setUp(self):
         self.sd = SortedDict([('elma', 1), ('armut', 2)])
 
@@ -65,6 +65,34 @@ class TestSortedSetContains(unittest.TestCase):
 
     def test_in_operator_for_nonexisting_element(self):
         self.assertFalse('kel' in self.sd)
+
+
+class TestSortedDictIterMethods(unittest.TestCase):
+    def setUp(self):
+        self.sd = SortedDict([
+            ('elma', 1),
+            ('armut', 2),
+            ('kel', 3),
+            ('mahmut', 4)
+        ])
+
+    def test_items(self):
+        l = [('armut', 2), ('elma', 1), ('kel', 3), ('mahmut', 4)]
+        self.assertEqual(list(self.sd.items()), l)
+
+    def test_keys(self):
+        l = ['armut', 'elma', 'kel', 'mahmut']
+        self.assertEqual(list(self.sd.keys()), l)
+
+    def test_values(self):
+        l = [2, 1, 3, 4]
+        self.assertEqual(list(self.sd.values()), l)
+
+    def test_iter(self):
+        l = []
+        for k in self.sd:
+            l.append(k)
+        self.assertEqual(l, ['armut', 'elma', 'kel', 'mahmut'])
 
 
 if __name__ == '__main__':
