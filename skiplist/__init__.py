@@ -24,9 +24,11 @@ class Pair(object):
 
 
 class SortedDict(SortedSet):
-    def __init__(self, items=None):
+    def __init__(self, items=None, **kwargs):
         items = map(lambda x: Pair(*x), items if items else [])
         super().__init__(items)
+        for k, v in kwargs.items():
+            self[k] = v
 
     def __getitem__(self, key):
         try:
