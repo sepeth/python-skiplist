@@ -201,6 +201,13 @@ SortedSet_length(SortedSet *self)
 
 
 static PyObject *
+SortedSet_level(SortedSet *self)
+{
+    return PyLong_FromLong(self->level);
+}
+
+
+static PyObject *
 SortedSet_repr(SortedSet *self)
 {
     PyObject *result = NULL, *keys, *listrepr, *tmp;
@@ -302,6 +309,8 @@ static PyMethodDef SortedSet_methods[] = {
      "remove an element from the list"},
     {"__getitem__", (PyCFunction)SortedSet_subscript, METH_O,
      "get an element from the list"},
+    {"level", (PyCFunction)SortedSet_level, METH_NOARGS,
+     "level of the skiplist"},
     {NULL}  /* Sentinel */
 };
 
