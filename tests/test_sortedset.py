@@ -47,7 +47,8 @@ class TestSortedSetRemove(unittest.TestCase):
 class TestSortedSetSubscript(unittest.TestCase):
     def test_search_an_element_in_the_empty_set(self):
         ss = SortedSet()
-        self.assertRaises(KeyError, ss.__getitem__, 7)
+        with self.assertRaises(KeyError):
+            ss[7]
 
 
 class TestSortedSetRepr(unittest.TestCase):

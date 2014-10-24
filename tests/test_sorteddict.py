@@ -17,7 +17,8 @@ class TestSortedDictInit(unittest.TestCase):
 class TestSortedDictSubscript(unittest.TestCase):
     def test_raise_keyerror_for_nonexisting_key(self):
         s = SortedDict()
-        self.assertRaises(KeyError, s.__getitem__, 'anaktar')
+        with self.assertRaises(KeyError):
+            s['anaktar']
 
     def test_setitem_and_getitem(self):
         s = SortedDict()
