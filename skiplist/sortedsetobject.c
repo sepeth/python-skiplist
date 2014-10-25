@@ -296,10 +296,20 @@ SortedSet_dealloc(SortedSet *self)
 }
 
 
+static PyTypeObject SortedSetType;
+
+
 static PyObject *
 SortedSet_issubset(SortedSet *self, PyObject *arg) {
-    SortedSet *other = (SortedSet*) arg;
+    SortedSet *other;
     Node *p, *q;
+
+    if (!PyObject_TypeCheck(arg, &SortedSetType)) {
+        PyErr_SetString(PyExc_TypeError, "other is not a SortedSet");
+        return NULL;
+    }
+
+    other = (SortedSet*) arg;
 
     if (Py_SIZE(self) > Py_SIZE(other))
         Py_RETURN_FALSE;
