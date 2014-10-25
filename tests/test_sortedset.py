@@ -73,6 +73,38 @@ class TestSortedSetContains(unittest.TestCase):
         self.assertNotIn(13, self.ss)
 
 
+class TestSortedSetIssubset(unittest.TestCase):
+    def test_longer_set_cannot_be_subset(self):
+        longer = SortedSet([7, 3, 5])
+        smaller = SortedSet([3, 5])
+        self.assertFalse(longer.issubset(smaller))
+
+    def test_set_is_subset_of_itself(self):
+        s = SortedSet([5, 3, 7])
+        self.assertTrue(s.issubset(s))
+
+    def test_same_sets_should_be_subset_eachother(self):
+        s1 = SortedSet([7, 3, 5])
+        s2 = SortedSet([5, 7, 3])
+        self.assertTrue(s1.issubset(s2))
+        self.assertTrue(s2.issubset(s1))
+
+    def test_smaller_set_scattered_throughout_longer_set(self):
+        odds = SortedSet(range(1, 11, 2))
+        numbers = SortedSet(range(0, 11))
+        self.assertTrue(odds.issubset(numbers))
+
+    def test_empty_set_issubset_of_everyset(self):
+        e = SortedSet()
+        s = SortedSet([7, 3, 5])
+        self.assertTrue(e.issubset(s))
+
+    def test_for_different_elements(self):
+        s1 = SortedSet([3, 5, 7])
+        s2 = SortedSet([3, 6, 7, 8])
+        self.assertFalse(s1.issubset(s2))
+
+
 class TestSortedSetIter(unittest.TestCase):
     def test_empty_sortedset(self):
         l = []

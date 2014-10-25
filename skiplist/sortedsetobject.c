@@ -296,6 +296,31 @@ SortedSet_dealloc(SortedSet *self)
 }
 
 
+static PyObject *
+SortedSet_issubset(SortedSet *self, PyObject *arg) {
+    SortedSet *other = (SortedSet*) arg;
+    Node *p, *q;
+
+    if (Py_SIZE(self) > Py_SIZE(other))
+        Py_RETURN_FALSE;
+
+    p = self->head.forwards[0];
+    q = other->head.forwards[0];
+
+    while (p != NULL && q != NULL) {
+        if (LESSTHAN(p->value, q->value))
+            Py_RETURN_FALSE;
+
+        if (EQUAL(p->value, q->value))
+            p = p->forwards[0];
+
+        q = q->forwards[0];
+    }
+
+    return PyBool_FromLong(p == NULL);
+}
+
+
 static PyObject* SortedSet_iter(PyObject *self);
 static PyObject* SortedSetIter_next(SortedSetIter *it);
 static int SortedSetIter_traverse(SortedSetIter *it, visitproc visit, void *arg);
@@ -309,6 +334,8 @@ static PyMethodDef SortedSet_methods[] = {
      "remove an element from the list"},
     {"__getitem__", (PyCFunction)SortedSet_subscript, METH_O,
      "get an element from the list"},
+    {"issubset", (PyCFunction)SortedSet_issubset, METH_O,
+     "test whether every element in the set is in other"},
     {"level", (PyCFunction)SortedSet_level, METH_NOARGS,
      "level of the skiplist"},
     {NULL}  /* Sentinel */
