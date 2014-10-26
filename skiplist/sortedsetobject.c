@@ -105,20 +105,11 @@ SortedSet_add(SortedSet *self, PyObject *arg)
 
 
 static int
-SortedSet_init(SortedSet *self, PyObject *args, PyObject *kwds)
+SortedSet_update(SortedSet *self, PyObject *iterable)
 {
-    PyObject *iterable = NULL, *it, *key;
-
-    if (!PyArg_ParseTuple(args, "|O:SortedSet", &iterable))
+    PyObject *key, *it = PyObject_GetIter(iterable);
+    if (it == NULL)
         return -1;
-
-    if (iterable == NULL)
-        return 0;
-
-    it = PyObject_GetIter(iterable);
-    if (it == NULL) {
-        return -1;
-    }
 
     while ((key = PyIter_Next(it)) != NULL) {
         if (SortedSet_add(self, key) == NULL) {
@@ -128,10 +119,52 @@ SortedSet_init(SortedSet *self, PyObject *args, PyObject *kwds)
         }
         Py_DECREF(key);
     }
-    Py_DECREF(it);
 
+    Py_DECREF(it);
     if (PyErr_Occurred())
         return -1;
+
+    return 0;
+}
+
+
+static PyObject *
+new_SortedSet(PyTypeObject *type, PyObject *iterable)
+{
+    SortedSet *self = NULL;
+
+    self = (SortedSet *)type->tp_alloc(type, 0);
+    if (self == NULL)
+        return NULL;
+
+    if (iterable != NULL) {
+        if (SortedSet_update(self, iterable)) {
+            Py_DECREF(self);
+            return NULL;
+        }
+    }
+
+    return (PyObject *)self;
+}
+
+
+static PyObject *
+SortedSet_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+{
+    return new_SortedSet(type, NULL);
+}
+
+
+static int
+SortedSet_init(SortedSet *self, PyObject *args, PyObject *kwds)
+{
+    PyObject *iterable = NULL;
+
+    if (!PyArg_ParseTuple(args, "|O:SortedSet", &iterable))
+        return -1;
+
+    if (iterable != NULL)
+        return SortedSet_update(self, iterable);
 
     return 0;
 }
@@ -300,13 +333,19 @@ static PyTypeObject SortedSetType;
 
 
 static PyObject *
-SortedSet_issubset(SortedSet *self, PyObject *arg) {
+SortedSet_issubset(SortedSet *self, PyObject *arg)
+{
     SortedSet *other;
     Node *p, *q;
 
     if (!PyObject_TypeCheck(arg, &SortedSetType)) {
-        PyErr_SetString(PyExc_TypeError, "other is not a SortedSet");
-        return NULL;
+        PyObject *tmp, *result;
+        tmp = new_SortedSet(&SortedSetType, arg);
+        if (tmp == NULL)
+            return NULL;
+        result = SortedSet_issubset(self, tmp);
+        Py_DECREF(tmp);
+        return result;
     }
 
     other = (SortedSet*) arg;
@@ -411,7 +450,7 @@ static PyTypeObject SortedSetType = {
     0,                             /* tp_dictoffset */
     (initproc)SortedSet_init,      /* tp_init */
     PyType_GenericAlloc,           /* tp_alloc */
-    PyType_GenericNew,             /* tp_new */
+    SortedSet_new,                 /* tp_new */
 };
 
 

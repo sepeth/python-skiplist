@@ -104,11 +104,10 @@ class TestSortedSetIssubset(unittest.TestCase):
         s2 = SortedSet([3, 6, 7, 8])
         self.assertFalse(s1.issubset(s2))
 
-    def test_not_so_fast(self):
+    def test_issubset_with_a_list(self):
         s = SortedSet([3, 5, 7])
         l = [3, 5, 7, 9]
-        with self.assertRaises(TypeError):
-            s.issubset(l)
+        self.assertTrue(s.issubset(l))
 
 
 class TestSortedSetIter(unittest.TestCase):
