@@ -7,6 +7,15 @@
 #define EQUAL(p, q)    PyObject_RichCompareBool(p, q, Py_EQ)
 
 
+#if PY_MAJOR_VERSION >= 3
+#define AS_STR PyUnicode_AsUTF8
+#define STR_FROM_FORMAT PyUnicode_FromFormat
+#else
+#define AS_STR PyString_AsString
+#define STR_FROM_FORMAT PyString_FromFormat
+#endif
+
+
 typedef struct Node {
     PyObject *value;
     struct Node *forwards[MAX_LEVEL];
@@ -35,6 +44,32 @@ random_level(void)
     while ((random() & 0xFFFF) < p)
         ++l;
     return l < MAX_LEVEL ? l : MAX_LEVEL - 1;
+}
+
+
+static const char *
+repr(PyObject *o)
+{
+    PyObject *r;
+    const char *s;
+
+    r = PyObject_Repr(o);
+    if (r == NULL)
+        return NULL;
+
+    s = AS_STR(r);
+    Py_DECREF(r);
+    return s;
+}
+
+
+static const char *
+repr_or_item(PyObject *o)
+{
+    const char *s = repr(o);
+    if (s == NULL)
+        return "item";
+    return s;
 }
 
 
@@ -192,7 +227,8 @@ SortedSet_remove(SortedSet *self, PyObject *arg)
         Py_SIZE(self) -= 1;
         PyMem_Free(next);
     } else {
-        PyErr_Format(PyExc_KeyError, "%R is not in the SortedSet", arg);
+        PyErr_Format(PyExc_KeyError, "%s is not in the SortedSet",
+                     repr_or_item(arg));
         return NULL;
     }
 
@@ -212,7 +248,8 @@ SortedSet_subscript(SortedSet *self, PyObject *key)
         Py_INCREF(next->value);
         return next->value;
     } else {
-        PyErr_Format(PyExc_KeyError, "%R is not in the SortedSet", key);
+        PyErr_Format(PyExc_KeyError, "%s is not in the SortedSet",
+                     repr_or_item(key));
         return NULL;
     }
 }
@@ -243,36 +280,31 @@ SortedSet_level(SortedSet *self)
 static PyObject *
 SortedSet_repr(SortedSet *self)
 {
-    PyObject *result = NULL, *keys, *listrepr, *tmp;
+    PyObject *result = NULL, *keys;
+    const char *listrepr;
     int status = Py_ReprEnter((PyObject*)self);
 
     if (status != 0) {
         if (status < 0)
             return NULL;
-        return PyUnicode_FromFormat("%s(...)", Py_TYPE(self)->tp_name);
+        return STR_FROM_FORMAT("%s(...)", Py_TYPE(self)->tp_name);
     }
 
     if (!Py_SIZE(self)) {
         Py_ReprLeave((PyObject*)self);
-        return PyUnicode_FromFormat("%s()", Py_TYPE(self)->tp_name);
+        return STR_FROM_FORMAT("%s()", Py_TYPE(self)->tp_name);
     }
 
     keys = PySequence_List((PyObject*)self);
     if (keys == NULL)
         goto done;
 
-    listrepr = PyObject_Repr(keys);
+    listrepr = repr(keys);
     Py_DECREF(keys);
     if (listrepr == NULL)
         goto done;
 
-    tmp = PyUnicode_Substring(listrepr, 1, PyUnicode_GET_LENGTH(listrepr)-1);
-    Py_DECREF(listrepr);
-    if (tmp == NULL)
-        goto done;
-
-    listrepr = tmp;
-    result = PyUnicode_FromFormat("%s({%U})", Py_TYPE(self)->tp_name, listrepr);
+    result = STR_FROM_FORMAT("%s(%s)", Py_TYPE(self)->tp_name, listrepr);
 
 done:
     Py_ReprLeave((PyObject*)self);
@@ -497,14 +529,6 @@ static PyTypeObject SortedSetIter_Type = {
 };
 
 
-static PyModuleDef sortedsetmodule = {
-    PyModuleDef_HEAD_INIT,
-    "_sortedset",
-    "SkipList implementation",
-    -1
-};
-
-
 static PyObject *
 SortedSet_iter(PyObject *self) {
     SortedSet *s = (SortedSet *)self;
@@ -552,18 +576,48 @@ SortedSetIter_traverse(SortedSetIter *it, visitproc visit, void *arg)
 }
 
 
-PyMODINIT_FUNC
-PyInit__sortedset(void)
+#if PY_MAJOR_VERSION >=3
+
+#define INITERROR return NULL
+#define MAIN PyMODINIT_FUNC PyInit__sortedset
+
+static PyModuleDef sortedsetmodule = {
+    PyModuleDef_HEAD_INIT,
+    "_sortedset",
+    "SkipList implementation",
+    -1
+};
+
+#else
+
+#define INITERROR return
+#define MAIN void init_sortedset
+
+static PyMethodDef module_methods[] = {
+    {NULL}  /* Sentinel */
+};
+
+#endif
+
+
+MAIN(void)
 {
     PyObject *m;
     if (PyType_Ready(&SortedSetType) < 0)
-        return NULL;
+        INITERROR;
 
+#if PY_MAJOR_VERSION >=3
     m = PyModule_Create(&sortedsetmodule);
+#else
+    m = Py_InitModule("_sortedset", module_methods);
+#endif
     if (m == NULL)
-        return NULL;
+        INITERROR;
 
     Py_INCREF(&SortedSetType);
     PyModule_AddObject(m, "SortedSet", (PyObject *)&SortedSetType);
+
+#if PY_MAJOR_VERSION >= 3
     return m;
+#endif
 }

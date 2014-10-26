@@ -1,5 +1,9 @@
 import unittest
+import sys
 from skiplist import SortedSet
+
+
+PY3 = sys.version_info[0] == 3
 
 
 class TestSortedSet(unittest.TestCase):
@@ -23,9 +27,10 @@ class TestSortedSetAdd(unittest.TestCase):
         self.ss.add(3)
         self.assertEqual(len(self.ss), 1)
 
-    def test_raise_unorderable_types(self):
-        self.ss.add(3)
-        self.assertRaises(TypeError, self.ss.add, 'sepeth')
+    if PY3:
+        def test_raise_unorderable_types(self):
+            self.ss.add(3)
+            self.assertRaises(TypeError, self.ss.add, 'sepeth')
 
 
 class TestSortedSetRemove(unittest.TestCase):
@@ -40,8 +45,9 @@ class TestSortedSetRemove(unittest.TestCase):
     def test_remove_an_elem_that_is_not_in_the_set(self):
         self.assertRaises(KeyError, self.ss.remove, 53153)
 
-    def test_raise_unorderable_types(self):
-        self.assertRaises(TypeError, self.ss.remove, 'sepeth')
+    if PY3:
+        def test_raise_unorderable_types(self):
+            self.assertRaises(TypeError, self.ss.remove, 'sepeth')
 
 
 class TestSortedSetSubscript(unittest.TestCase):
@@ -58,7 +64,7 @@ class TestSortedSetRepr(unittest.TestCase):
 
     def test_sortedset_repr_with_some_elements_in_it(self):
         s = SortedSet(['elma', 'armut', 'kel', 'mahmut'])
-        self.assertEqual("SortedSet({'armut', 'elma', 'kel', 'mahmut'})",
+        self.assertEqual("SortedSet(['armut', 'elma', 'kel', 'mahmut'])",
                          repr(s))
 
 
