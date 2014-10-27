@@ -408,17 +408,26 @@ static int SortedSetIter_traverse(SortedSetIter *it, visitproc visit, void *arg)
 static void SortedSetIter_dealloc(SortedSetIter *it);
 
 
+PyDoc_STRVAR(add_doc,
+"S.add(elem) -> None -- Add element elem to the set.");
+
+PyDoc_STRVAR(remove_doc,
+"S.remove(elem) -> None -- Remove element elem from the set.\n\n\
+Raises KeyError if elem is not contained in the set.");
+
+PyDoc_STRVAR(getitem_doc,
+"S[elem] -> object -- Return element if it is in the set.\n\n\
+Raises KeyError if elem is not contained in the set.");
+
+PyDoc_STRVAR(issubset_doc,
+"S.issubset(T) -> bool -- Test if every element in the set is in T.");
+
 static PyMethodDef SortedSet_methods[] = {
-    {"add", (PyCFunction)SortedSet_add, METH_O,
-     "add an element into the list"},
-    {"remove", (PyCFunction)SortedSet_remove, METH_O,
-     "remove an element from the list"},
-    {"__getitem__", (PyCFunction)SortedSet_subscript, METH_O,
-     "get an element from the list"},
-    {"issubset", (PyCFunction)SortedSet_issubset, METH_O,
-     "test whether every element in the set is in other"},
-    {"level", (PyCFunction)SortedSet_level, METH_NOARGS,
-     "level of the skiplist"},
+    {"add", (PyCFunction)SortedSet_add, METH_O, add_doc},
+    {"remove", (PyCFunction)SortedSet_remove, METH_O, remove_doc},
+    {"__getitem__", (PyCFunction)SortedSet_subscript, METH_O, getitem_doc},
+    {"issubset", (PyCFunction)SortedSet_issubset, METH_O, issubset_doc},
+    {"level", (PyCFunction)SortedSet_level, METH_NOARGS, NULL},
     {NULL}  /* Sentinel */
 };
 
