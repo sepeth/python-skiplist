@@ -40,6 +40,7 @@ static int
 random_level(void)
 {
     static const unsigned int p = PROBABILITY * 0xFFFF;
+
     int l = 0;
     while ((random() & 0xFFFF) < p)
         ++l;
@@ -67,6 +68,7 @@ static const char *
 repr_or_item(PyObject *o)
 {
     const char *s = repr(o);
+
     if (s == NULL)
         return "item";
     return s;
@@ -102,7 +104,6 @@ SortedSet_add(SortedSet *self, PyObject *arg)
 {
     Node *update[MAX_LEVEL];
     Py_ssize_t i;
-    int lvl;
     Node *new_node;
     Node *next = find_gt_or_eq(self, arg, update);
 
@@ -114,7 +115,7 @@ SortedSet_add(SortedSet *self, PyObject *arg)
         Py_DECREF(next->value);
         next->value = arg;
     } else {
-        lvl = random_level();
+        int lvl = random_level();
         if (lvl > self->level) {
             for (i = self->level + 1; i <= lvl; ++i)
                 update[i] = &self->head;
@@ -143,6 +144,7 @@ static int
 SortedSet_update(SortedSet *self, PyObject *iterable)
 {
     PyObject *key, *it = PyObject_GetIter(iterable);
+
     if (it == NULL)
         return -1;
 
@@ -317,6 +319,7 @@ SortedSet_traverse(SortedSet *self, visitproc visit, void *arg)
 {
     Node *next = NULL;
     Node *p;
+
     for (p = self->head.forwards[0]; p != NULL; p = next) {
         next = p->forwards[0];
         Py_VISIT(p->value);
@@ -329,6 +332,7 @@ static void
 setnull(Node *node)
 {
     Py_ssize_t i;
+
     for (i = 0; i < MAX_LEVEL; i++) {
         node->forwards[i] = NULL;
     }
@@ -340,6 +344,7 @@ SortedSet_clear(SortedSet *self)
 {
     Node *next = NULL;
     Node *p;
+
     for (p = self->head.forwards[0]; p != NULL; p = next) {
         PyObject *value = p->value;
         p->value = NULL;
@@ -542,6 +547,7 @@ static PyObject *
 SortedSet_iter(PyObject *self) {
     SortedSet *s = (SortedSet *)self;
     SortedSetIter *it = PyObject_GC_New(SortedSetIter, &SortedSetIter_Type);
+
     if (it == NULL) {
         return NULL;
     }
@@ -557,6 +563,7 @@ static PyObject *
 SortedSetIter_next(SortedSetIter *it)
 {
     Node *node = it->node;
+
     if (node == NULL) {
         Py_DECREF(it->self);
         it->self = NULL;
@@ -588,7 +595,7 @@ SortedSetIter_traverse(SortedSetIter *it, visitproc visit, void *arg)
 #if PY_MAJOR_VERSION >=3
 
 #define INITERROR return NULL
-#define MAIN PyMODINIT_FUNC PyInit__sortedset
+#define INIT PyMODINIT_FUNC PyInit__sortedset
 
 static PyModuleDef sortedsetmodule = {
     PyModuleDef_HEAD_INIT,
@@ -600,7 +607,7 @@ static PyModuleDef sortedsetmodule = {
 #else
 
 #define INITERROR return
-#define MAIN void init_sortedset
+#define INIT void init_sortedset
 
 static PyMethodDef module_methods[] = {
     {NULL}  /* Sentinel */
@@ -609,9 +616,10 @@ static PyMethodDef module_methods[] = {
 #endif
 
 
-MAIN(void)
+INIT(void)
 {
     PyObject *m;
+
     if (PyType_Ready(&SortedSetType) < 0)
         INITERROR;
 
