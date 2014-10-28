@@ -3,7 +3,7 @@ import sys
 from skiplist import SortedSet
 
 
-PY3 = sys.version_info[0] == 3
+PY2 = sys.version_info[0] == 2
 
 
 class TestSortedSet(unittest.TestCase):
@@ -27,10 +27,10 @@ class TestSortedSetAdd(unittest.TestCase):
         self.ss.add(3)
         self.assertEqual(len(self.ss), 1)
 
-    if PY3:
-        def test_raise_unorderable_types(self):
-            self.ss.add(3)
-            self.assertRaises(TypeError, self.ss.add, 'sepeth')
+    @unittest.skipIf(PY2, "comparing different types is ok in PY2")
+    def test_raise_unorderable_types(self):
+        self.ss.add(3)
+        self.assertRaises(TypeError, self.ss.add, 'sepeth')
 
 
 class TestSortedSetRemove(unittest.TestCase):
@@ -45,9 +45,9 @@ class TestSortedSetRemove(unittest.TestCase):
     def test_remove_an_elem_that_is_not_in_the_set(self):
         self.assertRaises(KeyError, self.ss.remove, 53153)
 
-    if PY3:
-        def test_raise_unorderable_types(self):
-            self.assertRaises(TypeError, self.ss.remove, 'sepeth')
+    @unittest.skipIf(PY2, "comparing different types is ok in PY2")
+    def test_raise_unorderable_types(self):
+        self.assertRaises(TypeError, self.ss.remove, 'sepeth')
 
 
 class TestSortedSetSubscript(unittest.TestCase):
