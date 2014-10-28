@@ -8,6 +8,7 @@
 
 
 #if PY_MAJOR_VERSION >= 3
+#define PY3
 #define AS_STR PyUnicode_AsUTF8
 #define STR_FROM_FORMAT PyUnicode_FromFormat
 #else
@@ -592,7 +593,7 @@ SortedSetIter_traverse(SortedSetIter *it, visitproc visit, void *arg)
 }
 
 
-#if PY_MAJOR_VERSION >=3
+#ifdef PY3
 
 #define INITERROR return NULL
 #define INIT PyMODINIT_FUNC PyInit__sortedset
@@ -623,7 +624,7 @@ INIT(void)
     if (PyType_Ready(&SortedSetType) < 0)
         INITERROR;
 
-#if PY_MAJOR_VERSION >=3
+#ifdef PY3
     m = PyModule_Create(&sortedsetmodule);
 #else
     m = Py_InitModule("_sortedset", module_methods);
@@ -634,7 +635,7 @@ INIT(void)
     Py_INCREF(&SortedSetType);
     PyModule_AddObject(m, "SortedSet", (PyObject *)&SortedSetType);
 
-#if PY_MAJOR_VERSION >= 3
+#ifdef PY3
     return m;
 #endif
 }
