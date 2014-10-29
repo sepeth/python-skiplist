@@ -13,13 +13,15 @@ wrapper on top of SortedSet.
 
 Here is a few examples:
 
-    >>> from skiplist import SortedSet, SortedDict
-    >>> d = SortedDict({'elma': 1, 'armut': 2, 'kel': 3, 'mahmut': 4})
-    SortedDict({'armut': 2, 'elma': 1, 'kel': 3, 'mahmut': 4})
+```python
+>>> from skiplist import SortedSet, SortedDict
+>>> d = SortedDict({'elma': 1, 'armut': 2, 'kel': 3, 'mahmut': 4})
+SortedDict({'armut': 2, 'elma': 1, 'kel': 3, 'mahmut': 4})
 
-    >>> del d['kel']
-    SortedDict({'armut': 2, 'elma': 1, 'mahmut': 4}) 
+>>> del d['kel']
+SortedDict({'armut': 2, 'elma': 1, 'mahmut': 4}) 
 
-    >>> cities = SortedSet(['Zurih', 'Izmir', 'Istanbul', 'Ankara'])
-    >>> cities
-    SortedSet(['Ankara', 'Istanbul', 'Izmir', 'Zurih']) 
+>>> cities = SortedSet(['Zurih', 'Izmir', 'Istanbul', 'Ankara'])
+>>> cities
+SortedSet(['Ankara', 'Istanbul', 'Izmir', 'Zurih'])
+```
