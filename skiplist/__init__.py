@@ -31,6 +31,8 @@ class Pair(object):
 
 class SortedDict(SortedSet):
     def __init__(self, items=None, **kwargs):
+        if isinstance(items, dict):
+            items = items.items()
         items = map(lambda x: Pair(*x), items if items else [])
         super(SortedDict, self).__init__(items)
         for k, v in kwargs.items():

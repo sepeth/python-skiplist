@@ -13,6 +13,11 @@ class TestSortedDictInit(unittest.TestCase):
         self.assertEqual(len(s), 4)
         self.assertEqual(s['kel'], 3)
 
+    def test_with_dict(self):
+        s = SortedDict({'elma': 1, 'armut': 2, 'kel': 3, 'mahmut': 4})
+        self.assertEqual(len(s), 4)
+        self.assertEqual(s['kel'], 3)
+
 
 class TestSortedDictSubscript(unittest.TestCase):
     def test_raise_keyerror_for_nonexisting_key(self):
