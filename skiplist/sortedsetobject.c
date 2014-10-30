@@ -1,4 +1,5 @@
 #include <Python.h>
+#include "structmember.h"
 
 #define MAX_LEVEL 16
 #define PROBABILITY 0.25
@@ -593,6 +594,160 @@ SortedSetIter_traverse(SortedSetIter *it, visitproc visit, void *arg)
 }
 
 
+
+/* Pair type */
+
+typedef struct {
+    PyObject_HEAD
+    PyObject *key;
+    PyObject *value;
+} Pair;
+
+
+static int
+Pair_init(Pair *self, PyObject *args, PyObject *kwds)
+{
+    PyObject *key = NULL, *value = NULL, *tmp;
+    static char *kwlist[] = {"key", "value", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|O:Pair", kwlist,
+                                     &key, &value))
+        return -1;
+
+    tmp = self->key;
+    self->key = key;
+    Py_INCREF(key);
+    Py_XDECREF(tmp);
+
+    if (value) {
+        tmp = self->value;
+        self->value = value;
+        Py_INCREF(value);
+        Py_XDECREF(tmp);
+    }
+
+    return 0;
+}
+
+
+static PyObject *
+Pair_richcompare(Pair *self, Pair *other, int op)
+{
+    if (op == Py_EQ && EQUAL(self->key, other->key) == 1)
+        Py_RETURN_TRUE;
+    if (op == Py_LT && LESSTHAN(self->key, other->key) == 1)
+        Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
+}
+
+
+static PyObject *
+Pair_repr(Pair *self)
+{
+    PyObject *ret = NULL;
+    char *keyrepr = NULL, *valrepr = NULL;
+    const char *tmp;
+
+    tmp = repr(self->key);
+    if (tmp == NULL)
+        goto done;
+
+    keyrepr = strdup(tmp);
+    if (keyrepr == NULL) {
+        ret = PyErr_NoMemory();
+        goto done;
+    }
+
+    tmp = repr(self->value);
+    if (tmp == NULL)
+        goto done;
+
+    valrepr = strdup(tmp);
+    if (valrepr == NULL) {
+        ret = PyErr_NoMemory();
+        goto done;
+    }
+
+    ret = STR_FROM_FORMAT("%s: %s", keyrepr, valrepr);
+
+done:
+    free(keyrepr);
+    free(valrepr);
+    return ret;
+}
+
+
+static PyObject *
+Pair_as_tuple(Pair *self)
+{
+    return PyTuple_Pack(2, self->key, self->value);
+}
+
+
+static void
+Pair_dealloc(Pair *self)
+{
+    Py_XDECREF(self->key);
+    Py_XDECREF(self->value);
+    Py_TYPE(self)->tp_free((PyObject *)self);
+}
+
+
+static PyMemberDef Pair_members[] = {
+    {"key", T_OBJECT, offsetof(Pair, key), 0, "key"},
+    {"value", T_OBJECT, offsetof(Pair, value), 0, "value"},
+    {NULL}
+};
+
+
+static PyMethodDef Pair_methods[] = {
+    {"as_tuple", (PyCFunction)Pair_as_tuple, METH_NOARGS, NULL},
+    {NULL}
+};
+
+
+static PyTypeObject PairType = {
+    PyVarObject_HEAD_INIT(&PyType_Type, 0)
+    "Pair",                         /* tp_name */
+    sizeof(Pair),                   /* tp_basicsize */
+    0,                              /* tp_itemsize */
+    (destructor)Pair_dealloc,       /* tp_dealloc */
+    0,                              /* tp_print */
+    0,                              /* tp_getattr */
+    0,                              /* tp_setattr */
+    0,                              /* tp_reserved */
+    (reprfunc)Pair_repr,            /* tp_repr */
+    0,                              /* tp_as_number */
+    0,                              /* tp_as_sequence */
+    0,                              /* tp_as_mapping */
+    0,                              /* tp_hash  */
+    0,                              /* tp_call */
+    0,                              /* tp_str */
+    0,                              /* tp_getattro */
+    0,                              /* tp_setattro */
+    0,                              /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,  /* tp_flags */
+    "Pair objects",                 /* tp_doc */
+    0,                              /* tp_traverse */
+    0,                              /* tp_clear */
+    (richcmpfunc)Pair_richcompare,  /* tp_richcompare */
+    0,                              /* tp_weaklistoffset */
+    0,                              /* tp_iter */
+    0,                              /* tp_iternext */
+    Pair_methods,                   /* tp_methods */
+    Pair_members,                   /* tp_members */
+    0,                              /* tp_getset */
+    0,                              /* tp_base */
+    0,                              /* tp_dict */
+    0,                              /* tp_descr_get */
+    0,                              /* tp_descr_set */
+    0,                              /* tp_dictoffset */
+    (initproc)Pair_init,            /* tp_init */
+    PyType_GenericAlloc,            /* tp_alloc */
+    PyType_GenericNew,              /* tp_new */
+};
+
+
 #ifdef PY3
 
 #define INITERROR return NULL
@@ -624,6 +779,9 @@ INIT(void)
     if (PyType_Ready(&SortedSetType) < 0)
         INITERROR;
 
+    if (PyType_Ready(&PairType) < 0)
+        INITERROR;
+
 #ifdef PY3
     m = PyModule_Create(&sortedsetmodule);
 #else
@@ -634,6 +792,8 @@ INIT(void)
 
     Py_INCREF(&SortedSetType);
     PyModule_AddObject(m, "SortedSet", (PyObject *)&SortedSetType);
+    Py_INCREF(&PairType);
+    PyModule_AddObject(m, "Pair", (PyObject *)&PairType);
 
 #ifdef PY3
     return m;

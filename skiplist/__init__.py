@@ -1,4 +1,4 @@
-from ._sortedset import SortedSet
+from ._sortedset import SortedSet, Pair
 
 __all__ = ['SortedDict', 'SortedSet']
 
@@ -7,26 +7,6 @@ try:
     from itertools import imap
 except ImportError:
     imap = map
-
-
-class Pair(object):
-    __slots__ = ('key', 'value')
-
-    def __init__(self, key, value=None):
-        self.key = key
-        self.value = value
-
-    def __lt__(self, other):
-        return self.key < other.key
-
-    def __eq__(self, other):
-        return self.key == other.key
-
-    def __repr__(self):
-        return "%r: %r" % (self.key, self.value)
-
-    def as_tuple(self):
-        return self.key, self.value
 
 
 class SortedDict(SortedSet):
