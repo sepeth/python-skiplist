@@ -51,7 +51,7 @@ random_level(void)
 
 
 static const char *
-repr(PyObject *o)
+cstr_repr(PyObject *o)
 {
     PyObject *r;
     const char *s;
@@ -69,7 +69,7 @@ repr(PyObject *o)
 static const char *
 repr_or_item(PyObject *o)
 {
-    const char *s = repr(o);
+    const char *s = cstr_repr(o);
 
     if (s == NULL)
         return "item";
@@ -303,7 +303,7 @@ SortedSet_repr(SortedSet *self)
     if (keys == NULL)
         goto done;
 
-    listrepr = repr(keys);
+    listrepr = cstr_repr(keys);
     Py_DECREF(keys);
     if (listrepr == NULL)
         goto done;
@@ -648,7 +648,7 @@ Pair_repr(Pair *self)
     char *keyrepr = NULL, *valrepr = NULL;
     const char *tmp;
 
-    tmp = repr(self->key);
+    tmp = cstr_repr(self->key);
     if (tmp == NULL)
         goto done;
 
@@ -658,7 +658,7 @@ Pair_repr(Pair *self)
         goto done;
     }
 
-    tmp = repr(self->value);
+    tmp = cstr_repr(self->value);
     if (tmp == NULL)
         goto done;
 
