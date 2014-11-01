@@ -1,4 +1,4 @@
-from ._sortedset import SortedSet, Pair
+from ._sortedset import SortedSet
 
 __all__ = ['SortedDict', 'SortedSet']
 
@@ -9,47 +9,53 @@ except ImportError:
     imap = map
 
 
-class SortedDict(SortedSet):
+class SortedDict(object):
     def __init__(self, items=None, **kwargs):
-        if isinstance(items, dict):
+        self._sortedkeys = SortedSet()
+        self._map = {}
+        if items is None:
+            items = []
+        elif isinstance(items, dict):
             items = items.items()
-        items = map(lambda x: Pair(*x), items if items else [])
-        super(SortedDict, self).__init__(items)
+        for k, v in items:
+            self[k] = v
         for k, v in kwargs.items():
             self[k] = v
 
     def __getitem__(self, key):
-        try:
-            return super(SortedDict, self).__getitem__(Pair(key)).value
-        except KeyError:
-            raise KeyError('%s is not in the SortedDict' % key)
+        return self._map[key]
 
     def __setitem__(self, key, value):
-        super(SortedDict, self).add(Pair(key, value))
+        if key not in self._map:
+            self._sortedkeys.add(key)
+        self._map[key] = value
 
     def __delitem__(self, key):
-        try:
-            self.remove(Pair(key))
-        except KeyError:
+        if key not in self._map:
             raise KeyError('%s is not in the SortedDict' % key)
+        self._sortedkeys.remove(key)
+        del self._map[key]
 
     def __contains__(self, key):
-        return super(SortedDict, self).__contains__(Pair(key))
+        return key in self._map
+
+    def __len__(self):
+        return len(self._map)
 
     def __iter__(self):
-        return imap(lambda x: x.key, super(SortedDict, self).__iter__())
+        return iter(self._sortedkeys)
 
     def __repr__(self):
         if len(self) == 0:
             return '%s()' % type(self).__name__
-        l = map(lambda x: repr(x), super(SortedDict, self).__iter__())
+        l = ('%r: %r' % (k, v) for k, v in self.items())
         return '%s({%s})' % (type(self).__name__, ', '.join(l))
 
     def items(self):
-        return map(lambda x: x.as_tuple(), super(SortedDict, self).__iter__())
+        return ((k, self._map[k]) for k in self._sortedkeys)
 
     def keys(self):
-        return map(lambda x: x.key, super(SortedDict, self).__iter__())
+        return iter(self._sortedkeys)
 
     def values(self):
-        return map(lambda x: x.value, super(SortedDict, self).__iter__())
+        return (self._map[k] for k in self._sortedkeys)
