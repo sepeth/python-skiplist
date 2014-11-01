@@ -21,7 +21,7 @@ SortedDict({'armut': 2, 'elma': 1, 'kel': 3, 'mahmut': 4})
 >>> del d['kel']
 >>> d
 SortedDict({'armut': 2, 'elma': 1, 'mahmut': 4})
->>> cities = SortedSet(['Zurih', 'Izmir', 'Istanbul', 'Ankara'])
+>>> cities = SortedSet(['Canakkale', 'Zurih', 'Izmir', 'Bolu', 'Istanbul'])
 >>> cities
-SortedSet(['Ankara', 'Istanbul', 'Izmir', 'Zurih'])
+SortedSet(['Bolu', 'Canakkale', 'Istanbul', 'Izmir', 'Zurih'])
 ```
