@@ -4,8 +4,8 @@
 #define MAX_LEVEL 16
 #define PROBABILITY 0.25
 
-#define LESSTHAN(p, q) fast_richcompare(p, q, Py_LT)
-#define EQUAL(p, q)    fast_richcompare(p, q, Py_EQ)
+#define LESSTHAN(p, q) PyObject_RichCompareBool(p, q, Py_LT)
+#define EQUAL(p, q)    PyObject_RichCompareBool(p, q, Py_EQ)
 
 
 #if PY_MAJOR_VERSION >= 3
@@ -36,33 +36,6 @@ typedef struct {
     Node *node;
     SortedSet *self;
 } SortedSetIter;
-
-
-static int
-fast_richcompare(PyObject *v, PyObject *w, int op)
-{
-    if (v == w)
-        return op == Py_EQ;
-    if (v->ob_type == w->ob_type) {
-#ifdef PY3
-        PyObject *res = v->ob_type->tp_richcompare(v, w, op);
-        Py_DECREF(res);
-        return res == Py_True;
-#else
-        if (v->ob_type->tp_richcompare) {
-            PyObject *res = v->ob_type->tp_richcompare(v, w, op);
-            Py_DECREF(res);
-            return res == Py_True;
-        } else if (v->ob_type->tp_compare) {
-            if (op == Py_EQ)
-                return v->ob_type->tp_compare(v, w) == 0;
-            if (op == Py_LT)
-                return v->ob_type->tp_compare(v, w) < 0;
-        }
-#endif
-    }
-    return PyObject_RichCompareBool(v, w, op);
-}
 
 
 static int
