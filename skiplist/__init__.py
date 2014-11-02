@@ -1,12 +1,16 @@
-from ._sortedset import SortedSet
-from collections import MutableMapping
+from ._sortedset import BaseSortedSet
+from collections import MutableMapping, MutableSet
 
 __all__ = ['SortedDict', 'SortedSet']
 
 
+class SortedSet(BaseSortedSet, MutableSet):
+    pass
+
+
 class SortedDict(MutableMapping):
     def __init__(self, items=None, **kwargs):
-        self._sortedkeys = SortedSet()
+        self._sortedkeys = BaseSortedSet()
         self._map = {}
         if items is None:
             items = []
@@ -28,7 +32,7 @@ class SortedDict(MutableMapping):
     def __delitem__(self, key):
         if key not in self._map:
             raise KeyError('%s is not in the SortedDict' % key)
-        self._sortedkeys.remove(key)
+        self._sortedkeys.discard(key)
         del self._map[key]
 
     def __len__(self):

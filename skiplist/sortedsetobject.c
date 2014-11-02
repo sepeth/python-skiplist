@@ -66,17 +66,6 @@ cstr_repr(PyObject *o)
 }
 
 
-static const char *
-repr_or_item(PyObject *o)
-{
-    const char *s = cstr_repr(o);
-
-    if (s == NULL)
-        return "item";
-    return s;
-}
-
-
 static Node *
 find_gt_or_eq(SortedSet *self, PyObject *arg, Node **update)
 {
@@ -210,7 +199,7 @@ SortedSet_init(SortedSet *self, PyObject *args, PyObject *kwds)
 
 
 static PyObject *
-SortedSet_remove(SortedSet *self, PyObject *arg)
+SortedSet_discard(SortedSet *self, PyObject *arg)
 {
     Node *next = NULL;
     Node *update[MAX_LEVEL];
@@ -230,10 +219,6 @@ SortedSet_remove(SortedSet *self, PyObject *arg)
         Py_DECREF(next->value);
         Py_SIZE(self) -= 1;
         PyMem_Free(next);
-    } else {
-        PyErr_Format(PyExc_KeyError, "%s is not in the SortedSet",
-                     repr_or_item(arg));
-        return NULL;
     }
 
     Py_RETURN_NONE;
@@ -399,16 +384,15 @@ static void SortedSetIter_dealloc(SortedSetIter *it);
 PyDoc_STRVAR(add_doc,
 "S.add(elem) -> None -- Add element elem to the set.");
 
-PyDoc_STRVAR(remove_doc,
-"S.remove(elem) -> None -- Remove element elem from the set.\n\n\
-Raises KeyError if elem is not contained in the set.");
+PyDoc_STRVAR(discard_doc,
+"S.discard(elem) -> None -- Remove elem from the set if it is present.");
 
 PyDoc_STRVAR(issubset_doc,
 "S.issubset(T) -> bool -- Test if every element in the set is in T.");
 
 static PyMethodDef SortedSet_methods[] = {
     {"add", (PyCFunction)SortedSet_add, METH_O, add_doc},
-    {"remove", (PyCFunction)SortedSet_remove, METH_O, remove_doc},
+    {"discard", (PyCFunction)SortedSet_discard, METH_O, discard_doc},
     {"issubset", (PyCFunction)SortedSet_issubset, METH_O, issubset_doc},
     {"level", (PyCFunction)SortedSet_level, METH_NOARGS, NULL},
     {NULL}  /* Sentinel */
@@ -603,7 +587,7 @@ INIT(void)
         INITERROR;
 
     Py_INCREF(&SortedSetType);
-    PyModule_AddObject(m, "SortedSet", (PyObject *)&SortedSetType);
+    PyModule_AddObject(m, "BaseSortedSet", (PyObject *)&SortedSetType);
 
 #ifdef PY3
     return m;

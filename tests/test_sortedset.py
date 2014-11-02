@@ -45,10 +45,6 @@ class TestSortedSetRemove(unittest.TestCase):
     def test_remove_an_elem_that_is_not_in_the_set(self):
         self.assertRaises(KeyError, self.ss.remove, 53153)
 
-    @unittest.skipIf(PY2, "comparing different types is ok in PY2")
-    def test_raise_unorderable_types(self):
-        self.assertRaises(TypeError, self.ss.remove, 'sepeth')
-
 
 class TestSortedSetRepr(unittest.TestCase):
     def test_empty_sortedset_repr(self):
