@@ -12,4 +12,5 @@ script:
     - coverage run --source=skiplist setup.py test
 
 after_success:
-    - cpp-coveralls --build-root .
+    - TRAVIS_JOB_ID=${TRAVIS_JOB_ID}C cpp-coveralls --build-root .
+    - coveralls
