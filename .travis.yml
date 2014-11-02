@@ -12,5 +12,5 @@ script:
     - coverage run --source=skiplist setup.py test
 
 after_success:
-    - cpp-coveralls --no-gcov
+    - cpp-coveralls --build-root .
     - coveralls
