@@ -26,7 +26,7 @@ setup(
     ext_modules=[
         Extension(
             'skiplist._sortedset',
-            extra_compile_args=['-Wall', '-Werror'],
+            extra_compile_args=['-Wall'],
             sources=['skiplist/sortedsetobject.c']
         ),
     ]
