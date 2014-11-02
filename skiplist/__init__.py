@@ -1,15 +1,10 @@
 from ._sortedset import SortedSet
+from collections import MutableMapping
 
 __all__ = ['SortedDict', 'SortedSet']
 
 
-try:
-    from itertools import imap
-except ImportError:
-    imap = map
-
-
-class SortedDict(object):
+class SortedDict(MutableMapping):
     def __init__(self, items=None, **kwargs):
         self._sortedkeys = SortedSet()
         self._map = {}
@@ -36,9 +31,6 @@ class SortedDict(object):
         self._sortedkeys.remove(key)
         del self._map[key]
 
-    def __contains__(self, key):
-        return key in self._map
-
     def __len__(self):
         return len(self._map)
 
@@ -50,12 +42,3 @@ class SortedDict(object):
             return '%s()' % type(self).__name__
         l = ('%r: %r' % (k, v) for k, v in self.items())
         return '%s({%s})' % (type(self).__name__, ', '.join(l))
-
-    def items(self):
-        return ((k, self._map[k]) for k in self._sortedkeys)
-
-    def keys(self):
-        return iter(self._sortedkeys)
-
-    def values(self):
-        return (self._map[k] for k in self._sortedkeys)
