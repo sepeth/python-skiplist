@@ -12,5 +12,4 @@ script:
     - coverage run --source=skiplist setup.py test
 
 after_success:
-    - cpp-coveralls --build-root . --verbose
-    - coveralls
+    - cpp-coveralls --build-root .
