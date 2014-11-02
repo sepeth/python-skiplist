@@ -240,25 +240,6 @@ SortedSet_remove(SortedSet *self, PyObject *arg)
 }
 
 
-static PyObject *
-SortedSet_subscript(SortedSet *self, PyObject *key)
-{
-    Node *next = find_gt_or_eq(self, key, NULL);
-
-    if (PyErr_Occurred())
-        return NULL;
-
-    if (next != NULL && EQUAL(next->value, key)) {
-        Py_INCREF(next->value);
-        return next->value;
-    } else {
-        PyErr_Format(PyExc_KeyError, "%s is not in the SortedSet",
-                     repr_or_item(key));
-        return NULL;
-    }
-}
-
-
 static int
 SortedSet_contains(SortedSet *self, PyObject *key)
 {
@@ -422,17 +403,12 @@ PyDoc_STRVAR(remove_doc,
 "S.remove(elem) -> None -- Remove element elem from the set.\n\n\
 Raises KeyError if elem is not contained in the set.");
 
-PyDoc_STRVAR(getitem_doc,
-"S[elem] -> object -- Return element if it is in the set.\n\n\
-Raises KeyError if elem is not contained in the set.");
-
 PyDoc_STRVAR(issubset_doc,
 "S.issubset(T) -> bool -- Test if every element in the set is in T.");
 
 static PyMethodDef SortedSet_methods[] = {
     {"add", (PyCFunction)SortedSet_add, METH_O, add_doc},
     {"remove", (PyCFunction)SortedSet_remove, METH_O, remove_doc},
-    {"__getitem__", (PyCFunction)SortedSet_subscript, METH_O, getitem_doc},
     {"issubset", (PyCFunction)SortedSet_issubset, METH_O, issubset_doc},
     {"level", (PyCFunction)SortedSet_level, METH_NOARGS, NULL},
     {NULL}  /* Sentinel */
@@ -453,13 +429,6 @@ static PySequenceMethods sortedset_as_sequence = {
 };
 
 
-static PyMappingMethods sortedset_as_mapping = {
-    (lenfunc)SortedSet_length,       /*mp_length*/
-    (binaryfunc)SortedSet_subscript, /*mp_subscript*/
-    0,                               /*mp_ass_subscript*/
-};
-
-
 static PyTypeObject SortedSetType = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     "SortedSet",                   /* tp_name */
@@ -473,7 +442,7 @@ static PyTypeObject SortedSetType = {
     (reprfunc)SortedSet_repr,      /* tp_repr */
     0,                             /* tp_as_number */
     &sortedset_as_sequence,        /* tp_as_sequence */
-    &sortedset_as_mapping,         /* tp_as_mapping */
+    0,                             /* tp_as_mapping */
     PyObject_HashNotImplemented,   /* tp_hash  */
     0,                             /* tp_call */
     0,                             /* tp_str */

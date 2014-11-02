@@ -50,13 +50,6 @@ class TestSortedSetRemove(unittest.TestCase):
         self.assertRaises(TypeError, self.ss.remove, 'sepeth')
 
 
-class TestSortedSetSubscript(unittest.TestCase):
-    def test_search_an_element_in_the_empty_set(self):
-        ss = SortedSet()
-        with self.assertRaises(KeyError):
-            ss[7]
-
-
 class TestSortedSetRepr(unittest.TestCase):
     def test_empty_sortedset_repr(self):
         s = SortedSet()
