@@ -5,10 +5,12 @@ python:
     - "3.3"
 
 install:
-    - pip install coveralls
+    - pip install cpp-coveralls coveralls
 
 script:
+    - CFLAGS="-coverage" python setup.py build_ext --inplace
     - coverage run --source=skiplist setup.py test
 
 after_success:
-    coveralls
+    - cpp-coveralls
+    - coveralls
