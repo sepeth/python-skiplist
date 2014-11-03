@@ -329,7 +329,14 @@ SortedSet_clear(SortedSet *self)
 static void
 SortedSet_dealloc(SortedSet *self)
 {
-    SortedSet_clear(self);
+    Node *next = NULL;
+    Node *p;
+
+    for (p = self->head.forwards[0]; p != NULL; p = next) {
+        next = p->forwards[0];
+        Py_XDECREF(p->value);
+        PyMem_FREE(p);
+    }
     PyObject_GC_Del((PyObject *)self);
 }
 
