@@ -527,8 +527,7 @@ SortedSetIter_next(SortedSetIter *it)
     Node *node = it->node;
 
     if (node == NULL) {
-        Py_DECREF(it->self);
-        it->self = NULL;
+        Py_CLEAR(it->self);
         return NULL;
     }
     it->node = it->node->forwards[0];
