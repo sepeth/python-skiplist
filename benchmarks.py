@@ -1,36 +1,42 @@
 from __future__ import print_function
-import timeit
+from contextlib import contextmanager
+import time
 import random
 import skiplist
+import gc
 
 
-setup_tmpl = """
-from __main__ import {0}
-"""
+@contextmanager
+def timeit(name):
+    oldgc = gc.isenabled()
+    gc.disable()
+    print('%s:' % name)
+    t1 = time.time()
+    yield
+    t2 = time.time()
+    if oldgc:
+        gc.enable()
+    print(t2 - t1)
 
 
-def timer(fn, n=100):
-    setup = setup_tmpl.format(fn.__name__)
-    print('%s:' % fn.__name__)
-    print(timeit.timeit('%s()' % fn.__name__, setup=setup, number=n))
-
-
-RANDOMLONGS = [random.randint(1, 500000) for i in range(1000)]
+RANDOMLONGS = [random.randint(1, 500000) for i in range(10000)]
 
 
 def sort_nearly_sortedlist():
     s = []
-    for i in RANDOMLONGS:
-        s.append(i)
-        s.sort()
+    with timeit('append to a list and sort it each time'):
+        for i in RANDOMLONGS:
+            s.append(i)
+            s.sort()
 
 
-def skiplist_add():
+def sortedset_add():
     s = skiplist.SortedSet()
-    for i in RANDOMLONGS:
-        s.add(i)
+    with timeit('add operation of SortedSet'):
+        for i in RANDOMLONGS:
+            s.add(i)
 
 
 if __name__ == '__main__':
-    timer(sort_nearly_sortedlist)
-    timer(skiplist_add)
+    sort_nearly_sortedlist()
+    sortedset_add()
