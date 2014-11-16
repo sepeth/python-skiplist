@@ -241,13 +241,6 @@ SortedSet_length(SortedSet *self)
 
 
 static PyObject *
-SortedSet_level(SortedSet *self)
-{
-    return PyLong_FromLong(self->level);
-}
-
-
-static PyObject *
 SortedSet_repr(SortedSet *self)
 {
     PyObject *result = NULL, *keys;
@@ -403,7 +396,6 @@ static PyMethodDef SortedSet_methods[] = {
     {"add", (PyCFunction)SortedSet_add, METH_O, add_doc},
     {"discard", (PyCFunction)SortedSet_discard, METH_O, discard_doc},
     {"issubset", (PyCFunction)SortedSet_issubset, METH_O, issubset_doc},
-    {"level", (PyCFunction)SortedSet_level, METH_NOARGS, NULL},
     {NULL}  /* Sentinel */
 };
 
