@@ -3,10 +3,10 @@ from setuptools import setup, find_packages, Extension
 
 
 setup(
-    name='skiplist',
+    name='python-skiplist',
     version='0.1',
     description='SortedSet and SortedDict implementation by using skiplist',
-    url='https://github.com/sepeth/skiplist.py',
+    url='https://github.com/sepeth/python-skiplist',
     author='Doğan Çeçen',
     author_email='sepeth@gmail.com',
 
