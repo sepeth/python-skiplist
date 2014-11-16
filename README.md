@@ -41,6 +41,6 @@ length               | O(1)
 
 SortedDict Operations | Average Case
 --------------------- | ------------
-__setitem__           | O(log N)
-__getitem__           | O(1)
-__delitem__           | O(log N)
+\__setitem__           | O(log N)
+\__getitem__           | O(1)
+\__delitem__           | O(log N)
