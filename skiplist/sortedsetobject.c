@@ -50,11 +50,11 @@ random_level(void)
 }
 
 
-static const char *
+static char *
 cstr_repr(PyObject *o)
 {
     PyObject *r;
-    const char *s;
+    char *s;
 
     r = PyObject_Repr(o);
     if (r == NULL)
@@ -251,7 +251,7 @@ static PyObject *
 SortedSet_repr(SortedSet *self)
 {
     PyObject *result = NULL, *keys;
-    const char *listrepr;
+    char *listrepr;
     int status = Py_ReprEnter((PyObject*)self);
 
     if (status != 0) {
@@ -274,7 +274,9 @@ SortedSet_repr(SortedSet *self)
     if (listrepr == NULL)
         goto done;
 
+    listrepr = strdup(listrepr);
     result = STR_FROM_FORMAT("%s(%s)", Py_TYPE(self)->tp_name, listrepr);
+    free(listrepr);
 
 done:
     Py_ReprLeave((PyObject*)self);
