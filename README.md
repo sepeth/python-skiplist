@@ -27,6 +27,12 @@ SortedDict({'armut': 2, 'elma': 1, 'mahmut': 4})
 SortedSet(['Bolu', 'Canakkale', 'Istanbul', 'Izmir', 'Zurih'])
 ```
 
+Installation
+------------
+
+```bash
+$ pip install python-skiplist
+```
 
 Asymptotic Bounds
 -----------------
