@@ -1,9 +1,9 @@
-skiplist.py
+python-skiplist
 ===========
 
-[![Build Status](https://travis-ci.org/sepeth/skiplist.py.svg?branch=master)](https://travis-ci.org/sepeth/skiplist.py)
-[![Coverage Status](https://img.shields.io/coveralls/sepeth/skiplist.py.svg)](https://coveralls.io/r/sepeth/skiplist.py?branch=master)
-[![Code Health](https://landscape.io/github/sepeth/skiplist.py/master/landscape.png)](https://landscape.io/github/sepeth/skiplist.py/master)
+[![Build Status](https://travis-ci.org/sepeth/python-skiplist.svg?branch=master)](https://travis-ci.org/sepeth/python-skiplist)
+[![Coverage Status](https://img.shields.io/coveralls/sepeth/python-skiplist.svg)](https://coveralls.io/r/sepeth/python-skiplist?branch=master)
+[![Code Health](https://landscape.io/github/sepeth/python-skiplist/master/landscape.png)](https://landscape.io/github/sepeth/python-skiplist/master)
 
 Skip Lists are data structure that can be used in place of balanced trees. They
 are easier to implement and generally faster. This library uses skip lists to
