@@ -26,3 +26,21 @@ SortedDict({'armut': 2, 'elma': 1, 'mahmut': 4})
 >>> cities
 SortedSet(['Bolu', 'Canakkale', 'Istanbul', 'Izmir', 'Zurih'])
 ```
+
+
+Asymptotic Bounds
+-----------------
+
+SortedSet Operations | Average Case
+-------------------- | ------------
+add                  | O(log N)
+discard              | O(log N)
+contains             | O(log N)
+length               | O(1)
+
+
+SortedDict Operations | Average Case
+--------------------- | ------------
+__setitem__           | O(log N)
+__getitem__           | O(1)
+__delitem__           | O(log N)
