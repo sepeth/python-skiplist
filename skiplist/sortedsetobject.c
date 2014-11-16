@@ -424,7 +424,7 @@ static PySequenceMethods sortedset_as_sequence = {
 
 static PyTypeObject SortedSetType = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    "SortedSet",                   /* tp_name */
+    "BaseSortedSet",               /* tp_name */
     sizeof(SortedSet),             /* tp_basicsize */
     0,                             /* tp_itemsize */
     (destructor)SortedSet_dealloc, /* tp_dealloc */
