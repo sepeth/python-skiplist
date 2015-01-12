@@ -20,14 +20,14 @@
 
 typedef struct Node {
     PyObject *value;
-    struct Node *forwards[MAX_LEVEL];
+    struct Node *forwards[];
 } Node;
 
 
 typedef struct {
     PyObject_VAR_HEAD
-    Node head;
     int level;
+    Node head;
 } SortedSet;
 
 
@@ -90,6 +90,16 @@ find_gt_or_eq(SortedSet *self, PyObject *arg, Node **update)
 }
 
 
+static Node*
+new_Node(int level)
+{
+    int size = sizeof(Node) + (level + 1) * sizeof(Node*);
+    Node *ret = PyMem_Malloc(size);
+    memset(ret, '\0', size);
+    return ret;
+}
+
+
 static PyObject *
 SortedSet_add(SortedSet *self, PyObject *arg)
 {
@@ -113,7 +123,7 @@ SortedSet_add(SortedSet *self, PyObject *arg)
             self->level = lvl;
         }
 
-        new_node = PyMem_Malloc(sizeof(Node));
+        new_node = new_Node(lvl);
         if (new_node == NULL)
             return PyErr_NoMemory();
         Py_INCREF(arg);
@@ -417,7 +427,7 @@ static PySequenceMethods sortedset_as_sequence = {
 static PyTypeObject SortedSetType = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     "BaseSortedSet",               /* tp_name */
-    sizeof(SortedSet),             /* tp_basicsize */
+    sizeof(SortedSet) + sizeof(Node*) * MAX_LEVEL,  /* tp_basicsize */
     0,                             /* tp_itemsize */
     (destructor)SortedSet_dealloc, /* tp_dealloc */
     0,                             /* tp_print */
